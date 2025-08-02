@@ -12,13 +12,16 @@ const UserSchema = Schema({
     },
     role:{
         type:String,
-        enum:["admin", "user"]
+        enum:["admin", "user"],
+        default:"user"
     },
     avatar:{
-        type:String
+        type:String,
+        default:""
     },
     isActive:{
-        type:Boolean
+        type:Boolean,
+        default:true
     }
 },{
     timestamps: true
