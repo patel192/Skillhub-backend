@@ -8,14 +8,14 @@ const userRoutes = require("./routes/UserRoutes");
 
 app.use(userRoutes);
 
-const PORT = 5000
+const PORT = 8000
 
 mongoose
   .connect("mongodb://localhost:27017/skillhub")
   .then(() => {
     console.log("database connected");
     app.listen(PORT, () => {
-      console.log("server running on the port number 5000");
+      console.log("server running on the port number 8000");
     });
   })
   .catch(() => {
