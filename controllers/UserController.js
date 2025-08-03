@@ -30,4 +30,29 @@ const GetAllUsers = async (req, res) => {
     });
   }
 };
-module.exports = { AddUser, GetAllUsers };
+const LoginUser = async (req, res) => {
+try{
+  const email = req.body.email
+  const password = req.body.password;
+  const foundUserFromEmail = await UserModel.findOne({ email: email });
+  console.log(foundUserFromEmail);
+  if(foundUserFromEmail != null){
+    const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+    if(isMatch == true){
+      res.status(200).json({
+        message:"Logged In Successfully",
+        data:foundUserFromEmail
+      })
+    }else{
+      res.status(400).json({
+        message:"Invalid Password"
+      })
+    }
+  }
+}catch(err){
+  res.status(500).json({
+    message: err.message,
+  });
+}
+}
+module.exports = { AddUser, GetAllUsers, LoginUser };
