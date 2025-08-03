@@ -1,14 +1,14 @@
 const express = require("express");
 const app = express();
-const cors = require("cors")
+const cors = require("cors");
 const mongoose = require("mongoose");
 app.use(express.json());
-app.use(cors())
+app.use(cors());
 const userRoutes = require("./routes/UserRoutes");
-
+const courseRoutes = require("./routes/CourseRoutes");
 app.use(userRoutes);
-
-const PORT = 8000
+app.use(courseRoutes);
+const PORT = 8000;
 
 mongoose
   .connect("mongodb://localhost:27017/skillhub")
