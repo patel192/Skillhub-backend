@@ -1,26 +1,27 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const CoursesSchema = Schema({
+const CourseSchema = Schema({
   title: {
     type: String,
+    required: [true, "Course title is required"],
   },
   description: {
     type: String,
+    required: [true, "Course description is required"],
   },
   instructor: {
     type: String,
-  },
-  thumbnail: {
-    type: String,
-    default: "", // You can store URL or path
+    required: [true, "Instructor name is required"],
   },
   category: {
     type: String,
-    enum: ["Web Development", "Data Science", "AI", "Design", "Marketing"],
-    required: true,
+    required: [true, "Category is required"],
+    enum: ["Web Development", "Data Science", "Design", "Marketing", "Other","AI"],
+    default: "Other",
   },
   duration: {
-    type: String, // e.g., "6 weeks", "10 hours"
+    type: String, // e.g., "10 hours"
+    required: true,
   },
   level: {
     type: String,
@@ -35,5 +36,9 @@ const CoursesSchema = Schema({
     type: Boolean,
     default: false,
   },
+  imageUrl: {
+    type: String,
+  },
 });
-module.exports = mongoose.model("Courses", CoursesSchema);
+
+module.exports = mongoose.model("Course", CourseSchema);

@@ -1,9 +1,9 @@
-const CoursesModel = require("../models/CoursesModel");
-const AddCourse = async (req, res) => {
+const CourseModel = require("../models/CoursesModel");
+const CreateCourse = async (req, res) => {
   try {
-    const AddedCourse = await CoursesModel.create(req.body);
+    const AddedCourse = await CourseModel.create(req.body);
     res.status(201).json({
-      message: "Course added successfully",
+      Message: "Course created successfully",
       data: AddedCourse,
     });
   } catch (err) {
@@ -12,17 +12,18 @@ const AddCourse = async (req, res) => {
     });
   }
 };
-const GetCourses = async (req, res) => {
-  try {
-    const Courses = await CoursesModel.find();
+const GetCourses = async (req,res)=>{
+  try{
+    const Courses = await CourseModel.find()
     res.status(200).json({
-      message: "Courses fetched successfully",
-      data: Courses,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+      message:"Courses Fetched Successfully",
+      data:Courses
+    })
+  }catch(err){
+   res.status(500).json({
+    message:err.message
+   })
   }
-};
-module.exports = { AddCourse,GetCourses };
+}
+
+module.exports = { CreateCourse, GetCourses }
