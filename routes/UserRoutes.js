@@ -3,4 +3,5 @@ const UserController = require("../controllers/UserController");
 route.post("/user", UserController.AddUser);
 route.get("/users", UserController.GetAllUsers);
 route.post("/loginuser", UserController.LoginUser);
+route.get("/user/:id",UserController.GetUserById)
 module.exports = route;

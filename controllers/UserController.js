@@ -55,4 +55,17 @@ try{
   });
 }
 }
-module.exports = { AddUser, GetAllUsers, LoginUser };
+const GetUserById = async (req,res) => {
+  try{
+    const UserById = await UserModel.findById(req.params.id)
+    res.status(200).json({
+      message:"user Fetched Successfully",
+      data:UserById
+    })
+  }catch(err){
+    res.status(500).json({
+      message:err.message
+    })
+  }
+}
+module.exports = { AddUser, GetAllUsers, LoginUser,GetUserById };
