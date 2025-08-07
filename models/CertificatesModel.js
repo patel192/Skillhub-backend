@@ -16,3 +16,4 @@ const CertificateSchema = Schema({
 },{
     timestamps:true
 })
+module.exports = mongoose.model("Certificate", CertificateSchema);

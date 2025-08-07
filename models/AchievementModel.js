@@ -17,3 +17,4 @@ const AchievementSchema = Schema({
 },{
     timestamps:true
 })
+module.exports = mongoose.model("Achievement", AchievementSchema);

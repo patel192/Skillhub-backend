@@ -1,4 +1,5 @@
-const Schema = require("mongoose").Schema;
+const mongoose = require("mongoose")
+const Schema = mongoose.Schema;
 const NotificationsSchema = Schema({
   userId: {
     type: Schema.Types.ObjectId,
@@ -20,3 +21,4 @@ const NotificationsSchema = Schema({
 },{
     timestamps: true
 });
+module.exports = mongoose.model("Notifications",NotificationsSchema)
