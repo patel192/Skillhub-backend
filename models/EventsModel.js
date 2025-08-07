@@ -18,7 +18,7 @@ const EventSchema = Schema({
             required:[true, "Event location is required"]
         },
         hostId:{
-            type:Schema.Types.OnjectId,
+            type:Schema.Types.ObjectId,
             ref:"User"
         },
         banner:{
@@ -30,6 +30,6 @@ const EventSchema = Schema({
             ref:"User"
         }]
 },{
-    timestamps:trueq
+    timestamps:true
 })
 module.exports = mongoose.model("Event",EventSchema)
