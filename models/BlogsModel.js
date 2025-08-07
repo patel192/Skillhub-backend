@@ -12,7 +12,7 @@ const BlogsSchema = Schema({
         type:String
     },
     tags:{
-        type:[String]
+        type:[String], 
     }
 },{
     timestamps:true

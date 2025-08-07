@@ -26,7 +26,7 @@ const UserSchema = Schema(
     },
     socials: {
       type: Object,
-      default:{linkedin:"", github:"", twitter:""}
+      default:""
     },
     isActive: {
       type: Boolean,
