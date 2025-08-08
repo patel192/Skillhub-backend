@@ -65,6 +65,12 @@ const CourseSchema = Schema({
     type: Boolean,
     default: false,
   },
+   resources: {
+    notes: [{ type: String }],
+    codeSnippets: [{ type: String }],
+    attachments: [{ type: String }],
+    videos: [{ type: String }]
+  }
 });
 
 module.exports = mongoose.model("Course", CourseSchema);

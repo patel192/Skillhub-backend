@@ -14,7 +14,7 @@ const ReportSchema = Schema({
         type:String,
     },
     status:{
-        type:string,
+        type:String,
         enum:["open", "reviewing", "closed"],
         default:"open"
     },
