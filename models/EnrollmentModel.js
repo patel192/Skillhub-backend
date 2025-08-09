@@ -7,12 +7,12 @@ const EnrollementSchema = Schema({
     },
     courseId:{
         type:Schema.Types.ObjectId,
-        ref:"COurse"
+        ref:"Course"
     },
     status:{
         type:String,
-        enum:["active", "completed", "dropped","cancelled"],
-        default:"active"
+        enum:["active", "completed", "dropped","cancelled","Registered"],
+        default:"Registered"
     },
     progress:{
         type:Number,
