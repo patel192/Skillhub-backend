@@ -9,7 +9,7 @@ const CourseSchema = Schema({
     type: String,
     required: [true, "Course description is required"],
   },
-  categoryId:{
+  categoryId: {
     type: Schema.Types.ObjectId,
     ref: "Category",
     required: [true, "Category ID is required"],
@@ -22,7 +22,14 @@ const CourseSchema = Schema({
   category: {
     type: String,
     required: [true, "Category is required"],
-    enum: ["Web Development", "Data Science", "Design", "Marketing", "Other","AI"],
+    enum: [
+      "Web Development",
+      "Data Science",
+      "Design",
+      "Marketing",
+      "Other",
+      "AI",
+    ],
     default: "Other",
   },
   imageUrl: {
@@ -41,35 +48,30 @@ const CourseSchema = Schema({
     enum: ["Beginner", "Intermediate", "Advanced"],
     default: "Beginner",
   },
-  language:{
-    type:String,
+  language: {
+    type: String,
     enum: ["English", "Spanish", "French", "German", "Other"],
     default: "English",
   },
-  tags:{
-    type:String,
-    default:""
+  tags: {
+    type: String,
+    default: "",
   },
-  content:{
-
+  content: {},
+  rating: {
+    type: Number,
+    default: 0,
   },
-  rating:{
-      type:Number,
-      default: 0
-    },
-    enrollemntCount:{
-    type:Number,
-    default: 0
-    },
+  enrollemntCount: {
+    type: Number,
+    default: 0,
+  },
   isPublished: {
     type: Boolean,
     default: false,
   },
-   resources: {
-    notes: [{ type: String }],
-    codeSnippets: [{ type: String }],
-    attachments: [{ type: String }],
-    videos: [{ type: String }]
+  overview:{
+    type:String
   }
 });
 
