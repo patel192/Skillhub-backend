@@ -10,12 +10,9 @@ const ResourcesSchema = Schema(
     title: {
       type: String,
     },
-    type:{
-      type:String,
-      enum:["note","code"]
-    },
     content: {
       type: String,
+      required:[true,"The Content is Required"]
     }
   },
   {
