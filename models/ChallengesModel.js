@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const ChallengesSchema = Schema({
+const ChallengesSchema = Schema(
+  {
     courseId: {
       type: Schema.Types.ObjectId,
       ref: "Course",
@@ -15,7 +16,7 @@ const ChallengesSchema = Schema({
       required: [true, "Challenge description is required"],
     },
     starterCode: {
-      type: String, 
+      type: String,
     },
     solutionCode: {
       type: String,
@@ -24,7 +25,16 @@ const ChallengesSchema = Schema({
       type: String,
       enum: ["Easy", "Medium", "Hard"],
       default: "Easy",
-    }},{
-    timestamps:true
-})
-module.exports  = mongoose.model("Challenges",ChallengesSchema);
+    },
+    testCases: [
+      {
+        input: { type: String, required: true },
+        expectedOutput: { type: Schema.Types.Mixed, required: true }, // Accepts any type
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+module.exports = mongoose.model("Challenges", ChallengesSchema);
