@@ -20,7 +20,8 @@ const skillsRoutes = require("./routes/SkillsRoutes");
 const reportRoutes = require("./routes/ReportRoutes");
 const resourceRoutes = require("./routes/ResourceRoutes");
 const overviewRoutes = require("./routes/OverviewRoutes");
-const challengesRoutes = require("./routes/ChallengesRoutes");
+const quizRoutes = require("./routes/QuizRoutes");
+
 const PORT = 8000;
 app.use(express.json());
 app.use(cors());
@@ -42,7 +43,8 @@ app.use(skillsRoutes);
 app.use(reportRoutes);
 app.use(resourceRoutes);
 app.use(overviewRoutes);
-app.use(challengesRoutes);
+app.use(quizRoutes);
+
 
 mongoose
   .connect("mongodb://localhost:27017/skillhub")
