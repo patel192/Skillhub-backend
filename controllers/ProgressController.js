@@ -1,6 +1,7 @@
 // controllers/progressController.js
 const mongoose = require("mongoose");
 const Progress = require("../models/ProgressModel");
+const User = require("../models/UserModel");
 
 const toObjectId = (value, name) => {
   if (!value) throw new Error(`${name} is required`);
@@ -29,6 +30,7 @@ const SaveProgress = async (req, res) => {
     const points = Number(req.body.points || 0);
     const quizAnswers = normalizeAnswers(req.body.quizAnswers || {});
 
+    // ✅ Save / update progress for this course
     const progress = await Progress.findOneAndUpdate(
       { userId, courseId },
       {
@@ -40,6 +42,16 @@ const SaveProgress = async (req, res) => {
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
+
+    // ✅ Calculate total points across all courses
+    const allProgress = await Progress.find({ userId });
+    const totalPoints = allProgress.reduce(
+      (sum, p) => sum + (p.points || 0),
+      0
+    );
+
+    // ✅ Update user model
+    await User.findByIdAndUpdate(userId, { points: totalPoints });
 
     return res.json({ success: true, data: progress });
   } catch (err) {
