@@ -21,6 +21,7 @@ const reportRoutes = require("./routes/ReportRoutes");
 const resourceRoutes = require("./routes/ResourceRoutes");
 const overviewRoutes = require("./routes/OverviewRoutes");
 const quizRoutes = require("./routes/QuizRoutes");
+const progressRoutes = require("./routes/ProgressRoutes");
 
 const PORT = 8000;
 app.use(express.json());
@@ -44,6 +45,7 @@ app.use(reportRoutes);
 app.use(resourceRoutes);
 app.use(overviewRoutes);
 app.use(quizRoutes);
+app.use("/progress",progressRoutes);
 
 
 mongoose
