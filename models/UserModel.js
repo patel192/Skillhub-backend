@@ -24,8 +24,16 @@ const UserSchema = Schema(
       type: String,
       default: "",
     },
-    socials: {
-      type: Object,
+    github: {
+      type: String,
+      default:""
+    },
+    linkedin: {
+      type: String,
+      default:""
+    },
+    twitter: {
+      type: String,
       default:""
     },
     isActive: {
@@ -35,7 +43,11 @@ const UserSchema = Schema(
     points:{
       type:Number,
       default:0
-    }
+    },
+    achievements:[{
+      type:Schema.Types.ObjectId,
+      ref:"Achievement"
+    }]
   },
   {
     timestamps: true,

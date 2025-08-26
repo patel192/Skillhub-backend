@@ -1,20 +1,22 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const AchievementSchema = Schema({
-  userId:{
-    type:Schema.Types.ObjectId,
-    ref:"User"
-  } ,
-  title:{
-    type:String
+const AchievementSchema = Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    icon: {
+      type: String,
+      required: true,
+    },
+    pointsRequired: {
+      type: Number,
+      required: true,
+    },
   },
-  description:{
-    type:String
-  },
-  badgeIcon:{
-    type:String
+  {
+    timestamps: true,
   }
-},{
-    timestamps:true
-})
+);
 module.exports = mongoose.model("Achievement", AchievementSchema);
