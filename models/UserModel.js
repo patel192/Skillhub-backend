@@ -46,7 +46,8 @@ const UserSchema = Schema(
     },
     achievements:[{
       type:Schema.Types.ObjectId,
-      ref:"Achievement"
+      ref:"Achievement",
+      default:[]
     }]
   },
   {

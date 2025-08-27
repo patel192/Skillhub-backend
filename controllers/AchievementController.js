@@ -1,12 +1,19 @@
 const AchievementModel = require("../models/AchievementModel");
 const UserModel = require("../models/UserModel");
+
+// Create a new achievement
 const CreateAchievement = async (req, res) => {
   try {
     const { name, icon, pointsRequired } = req.body;
-    const Achievement = await AchievementModel.create(req.body);
-    res.status(200).json({
+    const achievement = await AchievementModel.create({
+      name,
+      icon,
+      pointsRequired,
+    });
+
+    res.status(201).json({
       success: true,
-      Achievement,
+      achievement,
     });
   } catch (err) {
     res.status(500).json({
@@ -15,66 +22,92 @@ const CreateAchievement = async (req, res) => {
     });
   }
 };
-const CheckAchievement = async(req,res) => {
-    try{
-    const {userId} = req.params
-    const User = await UserModel.findbyId(userId).populate("achievements")
-    const allAchievements = await AchievementModel.find()
-    let newlyUnlocked  = []; 
+
+// Check and unlock achievements for a user
+const CheckAchievement = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    let user = await UserModel.findById(userId).populate("achievements");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const allAchievements = await AchievementModel.find();
+    let newlyUnlocked = [];
+
     for (const ach of allAchievements) {
-      const alreadyHas = User.achievements.some(
+      const alreadyHas = user.achievements.some(
         (a) => a._id.toString() === ach._id.toString()
       );
 
-      if (User.points >= ach.pointsRequired && !alreadyHas) {
-        User.achievements.push(ach._id);
+      if (user.points >= ach.pointsRequired && !alreadyHas) {
+        user.achievements.push(ach._id); // 👈 push ID not object
         newlyUnlocked.push(ach);
       }
     }
-    await User.save()
+
+    await user.save();
+
+    // Re-fetch with populated achievements
+    user = await UserModel.findById(userId).populate("achievements");
+
     res.json({
-        success:true,
-        newlyUnlocked,
-        achievements:User.achievements
-    })
-    }catch(err){
+      success: true,
+      newlyUnlocked,
+      achievements: user.achievements,
+    });
+  } catch (err) {
     res.status(500).json({
-        success:false,
-        error:err.message
-    })
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+// Get all achievements of a user
+const GetUserAchievements = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await UserModel.findById(userId).populate("achievements");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-}
-const GetUserAchievements = async(req,res) => {
-    try{
-    const {userId} = req.params
-    const User = await UserModel.findbyId(userId).populate("achievements")
+
     res.json({
-        success:true,
-        achievement:User.achievements
-    })
-    }catch(err){
-  res.status(500).json({
-    success:false,
-    error:err.message
-  })
-    }
-}
-const GetAchievements = async(req,res) => {
-   try{
-  const AllAchivements = await AchievementModel.find()
-  res.status(200).json({
-    message:"All Achievements Fetched Successfully",
-    data:AllAchivements
-  })
-   }catch(err){
-  res.status(500).json({
-    message:err.message
-  })
-   }
-}
+      success: true,
+      achievements: user.achievements,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+// Get all achievements in the system
+const GetAchievements = async (req, res) => {
+  try {
+    const allAchievements = await AchievementModel.find();
+
+    res.status(200).json({
+      success: true,
+      message: "All achievements fetched successfully",
+      data: allAchievements,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   CreateAchievement,
   CheckAchievement,
   GetUserAchievements,
-  GetAchievements
+  GetAchievements,
 };
