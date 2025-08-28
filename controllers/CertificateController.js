@@ -12,6 +12,20 @@ const AddCertificate = async (req,res) => {
      })
     }
 }
+const GetCertificatesByUserId = async (req,res) => {
+    try{
+   const Certificates = await CertificateModel.find({userId:req.params.userId})
+   res.status(200).json({
+    success:true,
+    data:Certificates
+   })
+    }catch(err){
+  res.status(500).json({
+    success:false,
+    message:err.message
+  })
+    }
+}
 module.exports={
-    AddCertificate
+    AddCertificate,GetCertificatesByUserId
 }

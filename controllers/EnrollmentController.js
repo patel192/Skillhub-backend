@@ -16,7 +16,7 @@ const EnrollmentsByUserId = async (req, res) => {
   try {
     const Enrolls = await EnrollmentController.find({
       userId: req.params.userId,
-    });
+    }).populate("courseId");
     res.status(200).json({
       message: "Enrolls For user Found Successfully",
       data: Enrolls,
