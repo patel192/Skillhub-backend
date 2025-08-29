@@ -1,23 +1,53 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const MessagesModel = Schema({
-    userId : {
-        type:Schema.Types.ObjectId,
-        ref:"User"
+
+const ReactionSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    subject:{
-        type:String
+    emoji: {
+      type: String,
+      required: true,
+    }, // e.g. "👍", "❤️", "😂"
+  },
+  { _id: false }
+);
+
+const MessageSchema = new Schema(
+  {
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    content:{
-        type:String
+    receiverId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    reply:{
-        type:String
+    text: {
+      type: String,
+      required: true,
     },
-    isResolved:{
-        type:Boolean
-    }
-},{
-    timestamps:true
-})
-module.exports = mongoose.model("Messages",MessagesModel)
+    read: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ✅ NEW: Reactions
+    reactions: [ReactionSchema],
+
+    // ✅ NEW: Reply
+    replyTo: {
+      type: Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Message", MessageSchema);
