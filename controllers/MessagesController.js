@@ -25,8 +25,9 @@ const GetConversations = async (req, res) => {
         { senderId: otherUserId, receiverId: userId },
       ],
     })
-      .populate("senderId", "name email")
-      .populate("replyTo")
+      .populate("senderId", "name email") // sender details
+      .populate("replyTo", "text") // include replied message text
+      .populate("reactions.userId", "fullname") // 👈 populate reactions with user fullname
       .sort({ createdAt: 1 }); // oldest → newest
 
     res.json({ success: true, messages });
@@ -34,16 +35,21 @@ const GetConversations = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-const AddReaction = async (req,res) => {
-    try {
+
+const AddReaction = async (req, res) => {
+  try {
     const { userId, emoji } = req.body;
     const { id } = req.params;
 
     let message = await MessagesModel.findById(id);
-    if (!message) return res.status(404).json({ success: false, error: "Message not found" });
+    if (!message)
+      return res
+        .status(404)
+        .json({ success: false, error: "Message not found" });
 
-    // If reaction exists by same user, update it
-    const existing = message.reactions.find(r => r.userId.toString() === userId);
+    const existing = message.reactions.find(
+      (r) => r.userId.toString() === userId
+    );
     if (existing) {
       existing.emoji = emoji;
     } else {
@@ -51,13 +57,18 @@ const AddReaction = async (req,res) => {
     }
 
     await message.save();
+
+    // repopulate so frontend gets fullname inside reactions
+    message = await message.populate("reactions.userId", "fullname");
+
     res.json({ success: true, message });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
-}
-const ReplyToMessage = async (req,res) => {
-    try {
+};
+
+const ReplyToMessage = async (req, res) => {
+  try {
     const { senderId, receiverId, text } = req.body;
     const { id } = req.params; // message being replied to
 
@@ -65,27 +76,26 @@ const ReplyToMessage = async (req,res) => {
       senderId,
       receiverId,
       text,
-      replyTo: id
+      replyTo: id,
     });
 
     res.json({ success: true, replyMessage });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
-}
-const DeleteMessage = async (req,res) => {
-
+};
+const DeleteMessage = async (req, res) => {
   try {
     await Message.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "Message deleted" });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
-}
+};
 module.exports = {
   SendMessage,
   GetConversations,
   AddReaction,
   ReplyToMessage,
-  DeleteMessage
+  DeleteMessage,
 };
