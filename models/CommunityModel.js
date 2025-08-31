@@ -1,5 +1,6 @@
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
 const MemberSchema = new Schema(
   {
     userId: {
@@ -29,7 +30,7 @@ const CommunitySchema = new Schema(
       required: true,
     },
     coverImage: {
-      type: String, // store URL or file path
+      type: String, // URL or path
       default: "",
     },
     createdBy: {
@@ -37,16 +38,17 @@ const CommunitySchema = new Schema(
       ref: "User",
       required: true,
     },
-    members: [MemberSchema], // all members with roles
-    pinnedPosts: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
+    members: {
+      type: [MemberSchema],
+      default: [],
+    },
+    pinnedPosts: {
+      type: [Schema.Types.ObjectId],
+      ref: "Post",
+      default: [],
+    },
   },
-  {
-    timestamps: true,
-  }
-)
-module.exports = mongoose.model("Community",CommunitySchema)
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Community", CommunitySchema);

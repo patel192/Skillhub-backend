@@ -46,10 +46,10 @@ app.use(skillsRoutes);
 app.use(reportRoutes);
 app.use(resourceRoutes);
 app.use(overviewRoutes);
-app.use(postRoutes);
+app.use("/posts",postRoutes);
 app.use("/progress",progressRoutes);
 app.use(quizRoutes);
-app.use(communityRoutes);
+app.use("/communities",communityRoutes);
 
 
 mongoose
