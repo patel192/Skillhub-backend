@@ -42,8 +42,8 @@ const getCommunity = async (req, res) => {
   try {
     const { id } = req.params;
     const community = await Community.findById(id)
-      .populate("createdBy", "name email")
-      .populate("members.userId", "name email")
+      .populate("createdBy", "fullname email")
+      .populate("members.userId", "fullname email")
       .populate("pinnedPosts");
 
     if (!community) {
