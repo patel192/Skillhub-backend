@@ -1,7 +1,12 @@
 const EnrollmentController = require("../models/EnrollmentModel");
+const eventEmitter = require("../events/EventEmitter")
 const AddEnrollment = async (req, res) => {
   try {
     const AddedEnrollment = await EnrollmentController.create(req.body);
+    eventEmitter.emit("ENROLLMENT_CREATED",{
+      userId:AddedEnrollment.userId,
+      courseId:AddedEnrollment.courseId
+    })
     res.status(200).json({
       message: "User Enrolled Successfully",
       data: AddedEnrollment,

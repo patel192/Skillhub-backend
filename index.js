@@ -1,3 +1,4 @@
+require("./events/listners")
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -25,6 +26,7 @@ const progressRoutes = require("./routes/ProgressRoutes");
 const postRoutes = require("./routes/PostRoutes")
 const communityRoutes = require("./routes/CommunityRoutes")
 
+
 const PORT = 8000;
 app.use(express.json());
 app.use(cors());
@@ -40,7 +42,7 @@ app.use(enrollmentRoutes);
 app.use(eventRoutes);
 app.use(feedbackRoutes);
 app.use(messagesRoutes);
-app.use(notificationRoutes);
+app.use("/notifications",notificationRoutes);
 app.use(searchlogsRoutes);
 app.use(skillsRoutes);
 app.use(reportRoutes);

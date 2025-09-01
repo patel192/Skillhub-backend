@@ -1,4 +1,5 @@
 const route = require("express").Router()
 const NotificationController = require("../controllers/NotificationController")
-route.post("/notification",NotificationController.AddNotification)
+route.get("/:userId",NotificationController.AllNotificationForUser)
+route.patch("/:id/read",NotificationController.ReadMessage)
 module.exports = route
