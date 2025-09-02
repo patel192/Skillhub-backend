@@ -1,10 +1,14 @@
 const Post = require("../models/PostModel");
-
+const eventEmitter = require("../events/EventEmitter")
 // Create a post
 const createPost = async (req, res) => {
   try {
     const { userId, communityId, content } = req.body;
     const post = await Post.create({ userId, communityId, content });
+    eventEmitter.emit("post-cretaed",{
+      userId:post.userId,
+      postId:post._id
+    })
     res.status(201).json({ success: true, data: post });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -70,6 +74,8 @@ const toggleLike = async (req, res) => {
       post.likes.push(userId);
     }
     await post.save();
+    eventEmitter.emit("post-Liked", { post, likedBy: userId });
+
     res.json({ success: true, data: post });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -85,6 +91,8 @@ const addComment = async (req, res) => {
 
     post.comments.push({ userId, content });
     await post.save();
+    eventEmitter.emit("post-Commented", { post, comment: content, commentedBy: userId });
+
 
     await post.populate("comments.userId", "name email");
 
