@@ -14,7 +14,7 @@ const Notification = require("../models/NotificationModel")
       await Notification.create({
         userId,
         type:"COURSE_ENROLLMENT",
-        message:`You have successfully enrolled in course ${courseId.title}`,
+        message:`You have successfully enrolled in course ${courseId}`,
         read:false
       })
      }catch(err){
