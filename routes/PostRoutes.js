@@ -14,6 +14,7 @@ router.post("/:id/like", postController.toggleLike);  // Like / Unlike
 // Comments
 router.post("/:id/comment", postController.addComment); // Add comment
 router.delete("/comment/:commentId", postController.deleteComment); // Delete comment
+router.post("/:postId/comment/:commentId/reply",postController.AddCommentReply)
 
 // Extra filters
 router.get("/community/:communityId", postController.getCommunityPosts); // Posts in community

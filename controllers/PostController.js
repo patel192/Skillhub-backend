@@ -1,14 +1,14 @@
 const Post = require("../models/PostModel");
-const eventEmitter = require("../events/EventEmitter")
+const eventEmitter = require("../events/EventEmitter");
 // Create a post
 const createPost = async (req, res) => {
   try {
     const { userId, communityId, content } = req.body;
     const post = await Post.create({ userId, communityId, content });
-    eventEmitter.emit("post-cretaed",{
-      userId:post.userId,
-      postId:post._id
-    })
+    eventEmitter.emit("post-cretaed", {
+      userId: post.userId,
+      postId: post._id,
+    });
     res.status(201).json({ success: true, data: post });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -33,7 +33,8 @@ const getPost = async (req, res) => {
     const post = await Post.findById(req.params.id)
       .populate("userId", "name email")
       .populate("comments.userId", "name email");
-    if (!post) return res.status(404).json({ success: false, error: "Post not found" });
+    if (!post)
+      return res.status(404).json({ success: false, error: "Post not found" });
     res.json({ success: true, data: post });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -43,7 +44,9 @@ const getPost = async (req, res) => {
 // Update post
 const updatePost = async (req, res) => {
   try {
-    const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     res.json({ success: true, data: post });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -65,7 +68,8 @@ const toggleLike = async (req, res) => {
   try {
     const { userId } = req.body;
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ success: false, error: "Post not found" });
+    if (!post)
+      return res.status(404).json({ success: false, error: "Post not found" });
 
     const alreadyLiked = post.likes.includes(userId);
     if (alreadyLiked) {
@@ -87,12 +91,16 @@ const addComment = async (req, res) => {
   try {
     const { userId, content } = req.body;
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ success: false, error: "Post not found" });
+    if (!post)
+      return res.status(404).json({ success: false, error: "Post not found" });
 
     post.comments.push({ userId, content });
     await post.save();
-    eventEmitter.emit("post-Commented", { post, comment: content, commentedBy: userId });
-
+    eventEmitter.emit("post-Commented", {
+      post,
+      comment: content,
+      commentedBy: userId,
+    });
 
     await post.populate("comments.userId", "name email");
 
@@ -140,7 +148,35 @@ const getUserPosts = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-
+const AddCommentReply = async (req, res) => {
+  try {
+    const { userId, content } = req.body;
+    const post = await Post.findById(req.params.postId);
+    if (!post)
+      return res.status(404).json({
+        success: false,
+        error: "Post Not Found",
+      });
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        error: "Comment Not Found",
+      });
+    }
+    comment.replies.push({ userId, content });
+    await post.save();
+    await post.populate("comments.userId", "fullname");
+    res.status(200).json({
+      success: true,
+      data: post,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || "inter Server Error",
+    });
+  }
+};
 module.exports = {
   createPost,
   getPosts,
@@ -152,4 +188,5 @@ module.exports = {
   deleteComment,
   getCommunityPosts,
   getUserPosts,
+  AddCommentReply
 };
