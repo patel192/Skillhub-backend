@@ -142,7 +142,7 @@ const getUserPosts = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.params.userId })
       .populate("communityId", "name")
-      .populate("comments.userId", "name email");
+      .populate("comments.userId", "fullname email");
     res.json({ success: true, data: posts });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

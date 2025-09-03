@@ -14,6 +14,12 @@ const EnrollementSchema = Schema({
         enum:["active", "completed", "dropped","cancelled","Registered"],
         default:"Registered"
     },
+    completedLessons:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:"Resources"
+        }
+    ],
     progress:{
         type:Number,
         default:0
