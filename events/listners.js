@@ -1,20 +1,23 @@
 const eventEmitter = require("./EventEmitter")
 const ActivityLog = require("../models/ActivityLogModel")
 const Notification = require("../models/NotificationModel")
+const Course = require("../models/CoursesModel")
  eventEmitter.on("ENROLLMENT_CREATED",async(payload)=>{
     const {userId,courseId} = payload
+    const course = await Course.findById(courseId).select("title")
+    const courseTitle = course.title
      try{
       await ActivityLog.create({
         userId,
         action:"ENROLLED",
         targetType:"Course",
         targetId:courseId,
-        message:`User enrolled in course ${courseId}`
+        message:`You enrolled in course ${courseTitle}`
       })
       await Notification.create({
         userId,
         type:"COURSE_ENROLLMENT",
-        message:`You have successfully enrolled in course ${courseId}`,
+        message:`You have successfully enrolled in course ${courseTitle}`,
         read:false
       })
      }catch(err){
