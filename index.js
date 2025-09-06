@@ -26,7 +26,7 @@ const progressRoutes = require("./routes/ProgressRoutes");
 const postRoutes = require("./routes/PostRoutes")
 const communityRoutes = require("./routes/CommunityRoutes")
 const activityRoutes = require("./routes/ActivityRoutes")
-
+const friendsRoutes = require("./routes/FriendsRoutes")
 const PORT = 8000;
 app.use(express.json());
 app.use(cors());
@@ -53,6 +53,7 @@ app.use("/progress",progressRoutes);
 app.use(quizRoutes);
 app.use("/communities",communityRoutes);
 app.use("/activities",activityRoutes)
+app.use("/friends",friendsRoutes)
 
 
 mongoose
