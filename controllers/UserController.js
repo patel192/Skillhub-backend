@@ -55,6 +55,65 @@ const LoginUser = async (req, res) => {
     });
   }
 };
+const UpdateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Allow only safe fields to be updated
+    const allowedUpdates = [
+      "fullname",
+      "bio",
+      "github",
+      "linkedin",
+      "twitter",
+      "avatar",
+      "email",
+    ];
+    const updates = {};
+    
+    allowedUpdates.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+    
+    const user = await UserModel.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+    
+    if (!user) {
+      return res
+      .status(404)
+      .json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("❌ Error updating user:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+const SearchUser = async (req,res) => {
+  try {
+    const q = req.query.q;
+    if (!q) {
+      return res.json({ users: [] });
+    }
+    
+    const users = await UserModel.find({
+      $or: [
+        { fullname: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } }
+      ]
+    }).select("_id fullname email avatar");
+    
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+}
 const GetUserById = async (req, res) => {
   try {
     const UserById = await UserModel.findById(req.params.id);
@@ -68,43 +127,4 @@ const GetUserById = async (req, res) => {
     });
   }
 };
-const UpdateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Allow only safe fields to be updated
-    const allowedUpdates = [
-      "fullname",
-      "bio",
-      "github",
-      "linkedin",
-      "twitter",
-      "avatar",
-      "email",
-    ];
-    const updates = {};
-
-    allowedUpdates.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
-
-    const user = await UserModel.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    res.json({ success: true, user });
-  } catch (err) {
-    console.error("❌ Error updating user:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-module.exports = { AddUser, GetAllUsers, LoginUser, GetUserById, UpdateUser };
+module.exports = { AddUser, GetAllUsers, LoginUser, GetUserById, UpdateUser ,SearchUser};

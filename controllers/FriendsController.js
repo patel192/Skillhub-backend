@@ -10,7 +10,7 @@ const SendFreindRequest = async (req,res) =>{
 
     if (existing) return res.status(400).json({ message: "Request already sent" });
 
-    const request = await Friendship.create({ requester: requesterId, recipient: recipientId });
+    const request = await FreindsModel.create({ requester: requesterId, recipient: recipientId });
     res.status(201).json({ message: "Request sent", data: request });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -46,4 +46,18 @@ const GetFriendsList = async (req,res) => {
     res.status(500).json({ message: err.message });
   }
 }
-module.exports = {SendFreindRequest,AcceptorRejectFriendRequest,GetFriendsList}
+const GetIncomingFriendRequests = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const requests = await FreindsModel.find({
+      recipient: userId,
+      status: "pending",
+    }).populate("requester", "fullname avatar email");
+
+    res.json({ data: requests });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = {SendFreindRequest,AcceptorRejectFriendRequest,GetFriendsList,GetIncomingFriendRequests}
