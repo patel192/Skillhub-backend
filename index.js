@@ -27,6 +27,7 @@ const postRoutes = require("./routes/PostRoutes")
 const communityRoutes = require("./routes/CommunityRoutes")
 const activityRoutes = require("./routes/ActivityRoutes")
 const friendsRoutes = require("./routes/FriendsRoutes")
+const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes")
 const PORT = 8000;
 app.use(express.json());
 app.use(cors());
@@ -54,6 +55,7 @@ app.use(quizRoutes);
 app.use("/communities",communityRoutes);
 app.use("/activities",activityRoutes)
 app.use("/friends",friendsRoutes)
+app.use(adminOverviewRoutes)
 
 
 mongoose
