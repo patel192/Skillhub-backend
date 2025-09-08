@@ -1,31 +1,43 @@
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
-const ReportSchema = Schema({
-    reporter:{
-        type:Schema.Types.ObjectId,
-        ref:"User"
-    },       
-    type:{
-        type:String,
-        enum:["bug", "abuse", "inappropriate"],
-        default:"bug"
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+const ReportSchema = Schema(
+  {
+    reporter: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    description:{
-        type:String,
+    type: {
+      type: String,
+      enum: ["bug", "abuse", "inappropriate"],
+      required: true,
     },
-    status:{
-        type:String,
-        enum:["open", "reviewing", "closed"],
-        default:"open"
+    description: {
+      type: String,
+      maxlength: [1000, "Description cannot exceed 1000 characters"],
     },
-    targetType:{
-        type:String
+    status: {
+      type: String,
+      enum: ["open", "reviewing", "closed"],
+      default: "open",
     },
-    targetId:{
-        type:Schema.Types.ObjectId,
-        ref:"Course"
-    }
-},{
-    timestamps:true
-})
-module.exports = mongoose.model("Report",ReportSchema)
+    targetType: {
+      type: String,
+      enum: ["Course", "User", "Post", "Comment"],
+      required: true,
+    },
+    targetId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      refPath: "targetType", // ✅ dynamic reference
+    },
+    resolvedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // admin who closed it
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Report", ReportSchema);
