@@ -2,7 +2,7 @@ const ReportModel = require("../models/ReportModel");
 
 // Add new report
 const AddReport = async (req, res) => {
-   try {
+  try {
     const { reporter, type, description, targetType, targetId } = req.body;
 
     if (!reporter || !type || !targetType || !targetId) {
@@ -70,9 +70,49 @@ const UpdateReportStatus = async (req, res) => {
     res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 };
-
+const GetReportById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const Report = await ReportModel.findById(id)
+      .populate("reporter", "fullname email")
+      .populate("targetId", "title fullname");
+    if (!Report) {
+      return res.status(404).json({
+        message: "Report Not Found",
+      });
+    }
+    res.status(200).json({
+      message: "Report Found Successfully",
+      report: Report,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+const DeleteReport = async (req,res) => {
+  try{
+   const {id} = req.params;
+   const DeletedReport = await ReportModel.findByIdAndDelete(id)
+   if(!DeleteReport){
+    return res.status(404).json({
+      message:"Report Not Found"
+    })
+   }
+   res.status(200).json({
+    message:"Report Deleted SuccessFully"
+   })
+  }catch(err){
+  res.status(500).json({
+    message:err.message
+  })
+  }
+}
 module.exports = {
   AddReport,
   GetReports,
   UpdateReportStatus,
+  GetReportById,
+  DeleteReport
 };
