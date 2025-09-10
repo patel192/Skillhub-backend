@@ -5,4 +5,4 @@ route.get("/reports", ReportController.GetReports);
 route.patch("/reports/:id", ReportController.UpdateReportStatus);
 route.get("/reports/:id",ReportController.GetReportById)
 route.delete("/report/:id",ReportController.DeleteReport)
-module.exports = route
+module.exports = route;
