@@ -29,22 +29,28 @@ const OverviewByCourseId = async (req, res) => {
 };
 const UpdateOverview = async (req,res) => {
   try {
-    const updated = await CourseModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updated) {
-      return res.status(404).json({ message: "Course not found" });
+    const { courseId } = req.params;
+    const { point } = req.body;
+
+    let overview = await OverviewModel.findOne({ courseId });
+
+    if (!overview) {
+      // if no overview exists, create one
+      overview = await OverviewModel.create({
+        courseId,
+        overview: [point],
+      });
+    } else {
+      overview.overview.push(point); // add bullet one by one
+      await overview.save();
     }
+
     res.status(200).json({
-      message: "Course updated successfully",
-      data: updated,
+      message: "Overview updated successfully",
+      data: overview,
     });
   } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 }
 module.exports = {
