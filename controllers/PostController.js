@@ -129,8 +129,8 @@ const deleteComment = async (req, res) => {
 const getCommunityPosts = async (req, res) => {
   try {
     const posts = await Post.find({ communityId: req.params.communityId })
-      .populate("userId", "name email")
-      .populate("comments.userId", "name email");
+      .populate("userId", "fullname email")
+      .populate("comments.userId", "fullname email");
     res.json({ success: true, data: posts });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
