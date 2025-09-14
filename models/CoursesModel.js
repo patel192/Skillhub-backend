@@ -9,12 +9,6 @@ const CourseSchema = Schema({
     type: String,
     required: [true, "Course description is required"],
   },
-  categoryId: {
-    type: Schema.Types.ObjectId,
-    ref: "Category",
-    required: [true, "Category ID is required"],
-  },
-
   instructor: {
     type: String,
     required: [true, "Instructor name is required"],
