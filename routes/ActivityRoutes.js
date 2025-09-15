@@ -1,4 +1,5 @@
 const routes = require("express").Router();
 const Activitycontroller = require("../controllers/ActivityController");
-routes.get("/:userId", Activitycontroller.ActivityByUserId);
+const authMiddleware = require("../middleware/authMiddleware")
+routes.get("/:userId",authMiddleware.verifyToken,Activitycontroller.ActivityByUserId);
 module.exports = routes;
