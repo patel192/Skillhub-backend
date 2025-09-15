@@ -4,47 +4,45 @@ const jwt = require("jsonwebtoken");
 
 const AddUser = async (req, res) => {
   try {
+    // Normalize email
+    const email = req.body.email.trim().toLowerCase();
+
+    // Check if user already exists
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already registered. Please login instead.",
+      });
+    }
+
     // Hash password
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
-    // Replace plain password with hashed one
-    req.body.password = hashedPassword;
-
-    // Default role (can be "user" or "admin" based on your app logic)
-    if (!req.body.role) {
-      req.body.role = "user";
-    }
-
     // Create user
-    const AddedUser = await UserModel.create(req.body);
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        id: AddedUser._id,
-        email: AddedUser.email,
-        role: AddedUser.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const newUser = await UserModel.create({
+      ...req.body,
+      email,
+      password: hashedPassword,
+    });
 
     res.status(201).json({
-      message: "User registered successfully",
+      message: "User added successfully",
       user: {
-        id: AddedUser._id,
-        email: AddedUser.email,
-        role: AddedUser.role,
+        id: newUser._id,
+        fullname: newUser.fullname,
+        email: newUser.email,
+        role: newUser.role,
       },
-      token,
     });
   } catch (err) {
     res.status(500).json({
-      message: err.message,
+      message: "Something went wrong",
+      error: err.message,
     });
   }
 };
+
 const GetAllUsers = async (req, res) => {
   try {
     const AllUsers = await UserModel.find();

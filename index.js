@@ -1,4 +1,5 @@
 require("./events/listners")
+require("dotenv").config()
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -29,6 +30,7 @@ const activityRoutes = require("./routes/ActivityRoutes")
 const friendsRoutes = require("./routes/FriendsRoutes")
 const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes")
 const PORT = 8000;
+
 app.use(express.json());
 app.use(cors());
 app.use(userRoutes);

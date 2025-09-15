@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
 // Verify token middleware
 const verifyToken = (req, res, next) => {
@@ -27,7 +27,6 @@ const isAdmin = (req, res, next) => {
   }
   next();
 };
-module.exports = {
-  verifyToken,
-  isAdmin,
-};
+
+
+module.exports = {verifyToken,isAdmin}
