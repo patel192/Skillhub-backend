@@ -1,5 +1,6 @@
 const route = require("express").Router()
 const ProgressController = require("../controllers/ProgressController")
-route.post("/save",ProgressController.SaveProgress)
-route.get("/:userId/:courseId",ProgressController.GetProgress)
+const authMiddleware = require("../middleware/authMiddleware")
+route.post("/save",authMiddleware.verifyToken,ProgressController.SaveProgress)
+route.get("/:userId/:courseId",authMiddleware.verifyToken,ProgressController.GetProgress)
 module.exports = route

@@ -1,6 +1,7 @@
 const route = require("express").Router()
 const OverviewController = require("../controllers/OverviewController")
-route.post("/overview",OverviewController.AddOverview)
-route.get("/overview/:courseId",OverviewController.OverviewByCourseId)
-route.patch("/overview/:courseId",OverviewController.UpdateOverview)
+const authMiddleware = require("../middleware/authMiddleware")
+route.post("/overview",authMiddleware.verifyToken,authMiddleware.isAdmin,OverviewController.AddOverview)
+route.get("/overview/:courseId",authMiddleware.verifyToken,OverviewController.OverviewByCourseId)
+route.patch("/overview/:courseId",authMiddleware.verifyToken,authMiddleware.isAdmin,OverviewController.UpdateOverview)
 module.exports = route;

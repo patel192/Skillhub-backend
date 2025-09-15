@@ -1,5 +1,6 @@
 const route = require("express").Router()
 const QuizController = require("../controllers/QuizController")
-route.post("/question",QuizController.AddQuestion)
-route.get("/questions/:courseId",QuizController.QuestionByCourseId)
+const authMiddleware = require("../middleware/authMiddleware")
+route.post("/question",authMiddleware.verifyToken,authMiddleware.isAdmin,QuizController.AddQuestion)
+route.get("/questions/:courseId",authMiddleware.verifyToken,QuizController.QuestionByCourseId)
 module.exports = route

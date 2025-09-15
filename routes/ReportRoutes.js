@@ -1,8 +1,9 @@
 const route = require("express").Router()
 const ReportController = require("../controllers/ReportController")
-route.post("/report",ReportController.AddReport)
-route.get("/reports", ReportController.GetReports); 
-route.patch("/reports/:id", ReportController.UpdateReportStatus);
-route.get("/reports/:id",ReportController.GetReportById)
-route.delete("/report/:id",ReportController.DeleteReport)
+const authMiddleware = require("../middleware/authMiddleware")
+route.post("/report",authMiddleware.verifyToken,ReportController.AddReport)
+route.get("/reports",authMiddleware.verifyToken,authMiddleware.isAdmin,ReportController.GetReports); 
+route.patch("/reports/:id",authMiddleware.verifyToken,authMiddleware.isAdmin,ReportController.UpdateReportStatus);
+route.get("/reports/:id",authMiddleware.verifyToken,authMiddleware.isAdmin,ReportController.GetReportById)
+route.delete("/report/:id",authMiddleware.verifyToken,authMiddleware.isAdmin,ReportController.DeleteReport)
 module.exports = route;
