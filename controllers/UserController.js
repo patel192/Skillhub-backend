@@ -116,7 +116,7 @@ const SearchUser = async (req,res) => {
 }
 const GetUserById = async (req, res) => {
   try {
-    const UserById = await UserModel.findById(req.params.id);
+    const UserById = await UserModel.findById(req.params.id).populate("achievements");
     res.status(200).json({
       message: "user Fetched Successfully",
       data: UserById,
