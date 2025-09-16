@@ -1,9 +1,10 @@
-require("./events/listners")
-require("dotenv").config()
+require("dotenv").config();
+require("./events/listners");
+
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
+
 const userRoutes = require("./routes/UserRoutes");
 const courseRoutes = require("./routes/CourseRoutes");
 const achievementRoutes = require("./routes/AchievementRoutes");
@@ -24,15 +25,19 @@ const resourceRoutes = require("./routes/ResourceRoutes");
 const overviewRoutes = require("./routes/OverviewRoutes");
 const quizRoutes = require("./routes/QuizRoutes");
 const progressRoutes = require("./routes/ProgressRoutes");
-const postRoutes = require("./routes/PostRoutes")
-const communityRoutes = require("./routes/CommunityRoutes")
-const activityRoutes = require("./routes/ActivityRoutes")
-const friendsRoutes = require("./routes/FriendsRoutes")
-const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes")
-const PORT = 8000;
+const postRoutes = require("./routes/PostRoutes");
+const communityRoutes = require("./routes/CommunityRoutes");
+const activityRoutes = require("./routes/ActivityRoutes");
+const friendsRoutes = require("./routes/FriendsRoutes");
+const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes");
+
+const app = express();
+const PORT = process.env.PORT || 8000; // ✅ Use dynamic port (important for Render)
 
 app.use(express.json());
 app.use(cors());
+
+// Routes
 app.use(userRoutes);
 app.use(courseRoutes);
 app.use(certificatesRoutes);
@@ -45,29 +50,32 @@ app.use(enrollmentRoutes);
 app.use(eventRoutes);
 app.use(feedbackRoutes);
 app.use(messagesRoutes);
-app.use("/notifications",notificationRoutes);
+app.use("/notifications", notificationRoutes);
 app.use(searchlogsRoutes);
 app.use(skillsRoutes);
 app.use(reportRoutes);
 app.use(resourceRoutes);
 app.use(overviewRoutes);
-app.use("/posts",postRoutes);
-app.use("/progress",progressRoutes);
+app.use("/posts", postRoutes);
+app.use("/progress", progressRoutes);
 app.use(quizRoutes);
-app.use("/communities",communityRoutes);
-app.use("/activities",activityRoutes)
-app.use("/friends",friendsRoutes)
-app.use(adminOverviewRoutes)
+app.use("/communities", communityRoutes);
+app.use("/activities", activityRoutes);
+app.use("/friends", friendsRoutes);
+app.use(adminOverviewRoutes);
 
-
+// ✅ MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/skillhub")
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
-    console.log("database connected");
+    console.log("✅ Database connected");
     app.listen(PORT, () => {
-      console.log("server running on the port number 8000");
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
-  .catch(() => {
-    console.log("connection failed");
+  .catch((err) => {
+    console.error("❌ Database connection failed:", err.message);
   });
