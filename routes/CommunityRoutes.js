@@ -4,8 +4,8 @@ const authMiddleware = require("../middleware/authMiddleware")
 
 // CRUD
 router.post("/",authMiddleware.verifyToken, communityController.createCommunity);
-router.get("/",authMiddleware.verifyToken,communityController.getCommunities);
-router.get("/:id",authMiddleware.verifyToken,communityController.getCommunity);
+router.get("/",communityController.getCommunities);
+router.get("/:id",communityController.getCommunity);
 router.put("/:id",authMiddleware.verifyToken,communityController.updateCommunity);
 router.delete("/:id",authMiddleware.verifyToken,communityController.deleteCommunity);
 
