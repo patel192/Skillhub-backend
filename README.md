@@ -1,5 +1,8 @@
 # SkillHub — Backend
 
+![Backend CI](https://github.com/patel192/Skillhub-backend/actions/workflows/backend-ci.yml/badge.svg)
+
+
 A backend REST API for the **SkillHub application**.  
 This server manages skill-related data and provides endpoints that can be consumed by a frontend client.
 
@@ -120,13 +123,55 @@ This backend is designed to work with the **SkillHub frontend** built using Reac
 
 ## 🧪 Testing
 
-You can test the API using:
+This project includes automated tests to ensure API reliability.
 
-- Postman  
-- Thunder Client (VS Code extension)
+### Run tests
 
-Send **JSON payloads** to the defined endpoints to verify responses.
+```bash
+npm test
+```
 
+Run tests with coverage
+```bash
+npm run test:coverage
+```
+
+Coverage reports will be generated in the coverage/ folder.
+
+Tools used:-
+
+--> Jest — Testing framework
+--> Supertest — HTTP endpoint testing
+
+Manual testing can also be performed using:
+--> Postman
+--> Thunder Client (VS Code extension)
+
+---
+
+## ⚙️ Continuous Integration (CI)
+
+This repository uses **GitHub Actions** to automatically test the backend on every push and pull request.
+
+### CI Pipeline includes:
+
+- Installing dependencies
+- Running automated tests
+- Ensuring build stability
+
+This helps maintain code quality and prevents breaking changes from being merged.
+---
+
+## 🚀 Deployment
+
+The backend is designed to be deployed on cloud platforms such as:
+
+- Render
+- Railway
+- AWS
+- Any Node.js hosting provider
+
+Environment variables must be configured on the hosting platform before deployment.
 ---
 
 ## 💡 Possible Enhancements
