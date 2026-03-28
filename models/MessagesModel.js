@@ -11,7 +11,7 @@ const ReactionSchema = new Schema(
     emoji: {
       type: String,
       required: true,
-    }, // e.g. "👍", "❤️", "😂"
+    },
   },
   { _id: false }
 );
@@ -36,11 +36,11 @@ const MessageSchema = new Schema(
       type: Boolean,
       default: false
     },
-
-    // ✅ NEW: Reactions
+    isEdited: {
+      type: Boolean,
+      default: false
+    },
     reactions: [ReactionSchema],
-
-    // ✅ NEW: Reply
     replyTo: {
       type: Schema.Types.ObjectId,
       ref: "Message",
@@ -49,5 +49,9 @@ const MessageSchema = new Schema(
   },
   { timestamps: true }
 );
+
+// Index for faster queries
+MessageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
+MessageSchema.index({ read: 1, receiverId: 1 });
 
 module.exports = mongoose.model("Message", MessageSchema);
