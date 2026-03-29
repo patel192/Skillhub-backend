@@ -9,7 +9,7 @@ route.get("/users",authMiddleware.verifyToken, UserController.GetAllUsers);
 route.get("/user/search",authMiddleware.verifyToken,UserController.SearchUser)
 route.get("/user/:id",authMiddleware.verifyToken,UserController.GetUserById)
 route.put("/user/:id",authMiddleware.verifyToken,UserController.UpdateUser)
-Router.post("/:userId/change-password",authMiddleware.verifyToken,UserController.ChangePassoword);
+route.post("/:userId/change-password",authMiddleware.verifyToken,UserController.ChangePassoword);
 // admin routes
 route.delete("/user/:id",authMiddleware.verifyToken,authMiddleware.isAdmin,UserController.DeleteUserById)
 module.exports = route;
