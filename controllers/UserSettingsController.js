@@ -1,5 +1,5 @@
 const UserSettings =require("../models/UserSettingsModel");
-export const getUserSettings = async (req, res) => {
+ const getUserSettings = async (req, res) => {
   try {
     const { userId } = req.params;
     let settings = await UserSettings.findOne({ userId });
@@ -18,7 +18,7 @@ export const getUserSettings = async (req, res) => {
   }
 };
 
-export const updateUserSettings = async (req,res) => {
+const updateUserSettings = async (req,res) => {
     try{
   const {userId} = req.params;
   const settings = await UserSettings.findOneAndUpdate({userId},req.body,{new:true,upsert:true});
@@ -32,4 +32,8 @@ res.json({
     message:"Failed to update the user settings"
 })
     }
+}
+module.exports = {
+  getUserSettings,
+  updateUserSettings
 }
