@@ -29,7 +29,7 @@ const communityRoutes = require("./routes/CommunityRoutes");
 const activityRoutes = require("./routes/ActivityRoutes");
 const friendsRoutes = require("./routes/FriendsRoutes");
 const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes");
-
+const userSettingsRoutes = require("./routes/UserSettingsRoutes")
 const app = express();
 
 app.use(express.json());
@@ -65,5 +65,5 @@ app.use("/communities", communityRoutes);
 app.use("/activities", activityRoutes);
 app.use("/friends", friendsRoutes);
 app.use(adminOverviewRoutes);
-
+app.use(userSettingsRoutes)
 module.exports = app;

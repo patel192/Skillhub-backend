@@ -1,6 +1,7 @@
 const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const UserSettings = require("../models/UserSetitngsModel");
 
 const AddUser = async (req, res) => {
   try {
@@ -25,6 +26,7 @@ const AddUser = async (req, res) => {
       email,
       password: hashedPassword,
     });
+    await UserSettings.create({ userId: newUser._id });
 
     res.status(201).json({
       message: "User added successfully",
@@ -80,7 +82,7 @@ const LoginUser = async (req, res) => {
         role: foundUser.role || "user", // default role
       },
       process.env.JWT_SECRET, // keep secret in env
-      { expiresIn: "7d" } // token expiry
+      { expiresIn: "7d" }, // token expiry
     );
 
     // ✅ Return response
@@ -162,7 +164,7 @@ const SearchUser = async (req, res) => {
 const GetUserById = async (req, res) => {
   try {
     const UserById = await UserModel.findById(req.params.id).populate(
-      "achievements"
+      "achievements",
     );
     res.status(200).json({
       message: "user Fetched Successfully",
@@ -174,81 +176,80 @@ const GetUserById = async (req, res) => {
     });
   }
 };
-const DeleteUserById = async(req,res) => {
-
-  try{
- const DeletedUser = UserModel.findByIdAndDelete(req.params.id)
- res.status(200).json({
-  message:"User Deleted Successfully",
-  data:DeletedUser
- })
-  }catch(err){
- res.status(500).json({
-  message:err.message
- })
-  }
-}
-
-const ChangePassoword = async (req,res) => {
-  try{
-  const {userId} = req.params;
-  const {currentPassword,newPassword} = req.body;
-  const authUserId = req.user.id;
-
-  if(userId !== authUserId) {
-    return res.status(403).json({
-      success:false,
-      message:"Unauthorized: You can only change your own password"
+const DeleteUserById = async (req, res) => {
+  try {
+    const DeletedUser = UserModel.findByIdAndDelete(req.params.id);
+    res.status(200).json({
+      message: "User Deleted Successfully",
+      data: DeletedUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
     });
   }
-  if(!currentPassword || !newPassword) {
-    return res.status(400).json({
-      success:false,
-      message:"New password must be at least 8 characters Long"
-    });
-  }
-  const user = await UserModel.findById(userId).select(`+password`);
+};
 
-  if(!user){
-    return res.status(404).json({
-      success:false,
-      message:"User Not Found"
-    });
-  }
-  const isMatch = await bcrypt.compare(currentPassword,user.password);
-  if(!isMatch){
-    return res.status(400).json({
-      success:false,
-      message:"Current Password is Incorrect"
-    });
-  }
-  const isSamePassword = await bcrypt.compare(newPassword,user.password);
-  if(isSamePassword){
-    return res.status(400).json({
-      success:false,
-      message:"New Password must be different from the current password"
-    });
-  }
+const ChangePassoword = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { currentPassword, newPassword } = req.body;
+    const authUserId = req.user.id;
 
-  const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash(newPassword,salt);
-  user.password = hashedPassword;
-  user.tokenVersion = (user.tokenVersion || 0) + 1;
-  await user.save();
-  res.status(200).json({
-    success:true,
-    message:"Password changed successfully",
-    data:{
-      changedAt:new Date().toISOString()
+    if (userId !== authUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized: You can only change your own password",
+      });
     }
-  });
-  }catch(err){
-   res.status(500).json({
-    success:false,
-    message:"Internal Server Error"
-   });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters Long",
+      });
+    }
+    const user = await UserModel.findById(userId).select(`+password`);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User Not Found",
+      });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Current Password is Incorrect",
+      });
+    }
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New Password must be different from the current password",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+      data: {
+        changedAt: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
-}
+};
 module.exports = {
   AddUser,
   GetAllUsers,
@@ -257,5 +258,5 @@ module.exports = {
   UpdateUser,
   SearchUser,
   DeleteUserById,
-  ChangePassoword
+  ChangePassoword,
 };
