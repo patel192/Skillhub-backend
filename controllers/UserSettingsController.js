@@ -1,4 +1,4 @@
-import UserSettings from "../models/UserSetitngsModel";
+const UserSettings =require("../models/UserSettingsModel");
 export const getUserSettings = async (req, res) => {
   try {
     const { userId } = req.params;
