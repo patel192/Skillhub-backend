@@ -60,8 +60,8 @@ const GetAllUsers = async (req, res) => {
 };
 const LoginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
+    const email = req.body.email.trim().toLowerCase();
+    const password = req.body.password;
     // 🔍 Find user by email
     const foundUser = await UserModel.findOne({ email });
     if (!foundUser) {
@@ -97,6 +97,8 @@ const LoginUser = async (req, res) => {
         avatar: foundUser.avatar,
       },
     });
+    console.log("User found:", foundUser.email);
+    console.log("Password match:", isMatch);
   } catch (err) {
     console.error("❌ Login Error:", err);
     res.status(500).json({ message: "Internal server error" });
