@@ -27,6 +27,17 @@ const GetResourceByCourseId = async (req, res) => {
     });
   }
 };
+const DeleteResource = async (req, res) => {
+  try {
+    const deleted = await ResourcesModel.findByIdAndDelete(req.params.lessonId);
+    if (!deleted) {
+      return res.status(404).json({ message: "Lesson not found" });
+    }
+    res.status(200).json({ message: "Lesson deleted successfully", data: deleted });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Internal Server Error" });
+  }
+};
 module.exports = {
-  AddResource,GetResourceByCourseId
+  AddResource, GetResourceByCourseId, DeleteResource
 };
