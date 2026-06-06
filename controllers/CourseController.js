@@ -1,10 +1,45 @@
 const CourseModel = require("../models/CoursesModel");
+const {PutObjectCommand} = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
 const CreateCourse = async (req, res) => {
   try {
     const AddedCourse = await CourseModel.create(req.body);
     res.status(201).json({
       Message: "Course created successfully",
       data: AddedCourse,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+const UploadCourseThumbnail = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const fileName =
+      `course-thumbnails/${Date.now()}-${req.file.originalname}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: fileName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      }),
+    );
+
+    const imageUrl =
+      `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+
+    res.status(200).json({
+      message: "Thumbnail uploaded successfully",
+      imageUrl,
     });
   } catch (err) {
     res.status(500).json({
@@ -59,4 +94,4 @@ const UpdateCourse = async (req,res) => {
   }
 }
 
-module.exports = { CreateCourse, GetCourses ,CourseById,UpdateCourse}
+module.exports = { CreateCourse, GetCourses ,CourseById,UpdateCourse, UploadCourseThumbnail}
