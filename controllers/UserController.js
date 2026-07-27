@@ -2,6 +2,9 @@ const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserSettings = require("../models/UserSettingsModel");
+const AppError = require("../utils/AppError");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
 
 const AddUser = async (req, res) => {
   try {
@@ -163,24 +166,21 @@ const SearchUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-const GetUserById = async (req, res) => {
-  try {
-    const UserById = await UserModel.findById(req.params.id).populate(
-      "achievements",
-    );
-    res.status(200).json({
-      message: "user Fetched Successfully",
-      data: UserById,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+const GetUserById =catchAsync(async (req, res) => {
+  const user = await UserModel.findById(req.params.id).populate("achievements");
+  if(!user) {
+    throw new AppError("User not found", 404);
   }
-};
-const DeleteUserById = async (req, res) => {
+
+  return ResponseHandler.success(
+    res,
+    "User Fetched Successfully",
+    user
+  );
+});
+const DeleteUserById =  async (req, res) => {
   try {
-    const DeletedUser = UserModel.findByIdAndDelete(req.params.id);
+    const DeletedUser = await UserModel.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "User Deleted Successfully",
       data: DeletedUser,

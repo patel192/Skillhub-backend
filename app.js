@@ -3,6 +3,7 @@ require("./events/listners");
 
 const express = require("express");
 const cors = require("cors");
+const errorHandler = require("./middleware/errorHandler");
 
 const userRoutes = require("./routes/UserRoutes");
 const courseRoutes = require("./routes/CourseRoutes");
@@ -39,6 +40,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+
 // Routes
 app.use(userRoutes);
 app.use(courseRoutes);
@@ -66,4 +68,11 @@ app.use("/activities", activityRoutes);
 app.use("/friends", friendsRoutes);
 app.use(adminOverviewRoutes);
 app.use(userSettingsRoutes)
+
+const AppError = require("./utils/AppError");
+
+app.get("/test-error", (req, res, next) => {
+    next(new AppError("This is a test error", 400));
+});
+app.use(errorHandler);
 module.exports = app;

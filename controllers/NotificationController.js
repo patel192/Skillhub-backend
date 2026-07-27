@@ -1,4 +1,4 @@
-const NotificationModel = require("../models/NotificationsModel");
+const NotificationModel = require("../models/NotificationModel");
 const AllNotificationForUser = async (req, res) => {
   try {
     const notifications = await NotificationModel.find({ userId: req.params.userId })
