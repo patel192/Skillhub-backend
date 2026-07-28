@@ -15,6 +15,7 @@ mongoose
 
     // Create HTTP server
     const httpServer = http.createServer(app);
+    console.log("PORT =", PORT, typeof PORT);
     
     // Initialize Socket.IO
     initializeSocket(httpServer);
@@ -26,5 +27,5 @@ mongoose
     });
   })
   .catch((err) => {
-    console.error("❌ Database connection failed:", err.message);
+    console.err("❌ Database connection failed:", err.message);
   });
