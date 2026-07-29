@@ -1,31 +1,29 @@
-const CertificateModel = require("../models/CertificatesModel")
-const AddCertificate = async (req,res) => {
-    try{
-    const AddedCertificate = await CertificateModel.create(req.body)
-    res.status(200).json({
-        message:"Certificate Added Successfully",
-        data:AddedCertificate
-    })
-    }catch(err){
-     res.status(500).json({
-        message:err.message || "Internal Server Error"
-     })
-    }
-}
-const GetCertificatesByUserId = async (req,res) => {
-    try{
-   const Certificates = await CertificateModel.find({userId:req.params.userId})
-   res.status(200).json({
-    success:true,
-    data:Certificates
-   })
-    }catch(err){
-  res.status(500).json({
-    success:false,
-    message:err.message
-  })
-    }
-}
-module.exports={
-    AddCertificate,GetCertificatesByUserId
-}
+const CertificateService = require("../services/CertificateService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
+
+const AddCertificate = catchAsync(async (req, res) => {
+  const certificate = await CertificateService.addCertificate(req.body);
+  return ResponseHandler.success(
+    res,
+    "Certificate Added Successfully",
+    certificate,
+    201,
+  );
+});
+
+const GetCertificatesByUserId = catchAsync(async (req, res) => {
+  const certificates = await CertificateService.getCertificatesByUserId(
+    req.params.userId,
+  );
+  return ResponseHandler.success(
+    res,
+    "Certificates fetched successfully",
+    certificates,
+  );
+});
+
+module.exports = {
+  AddCertificate,
+  GetCertificatesByUserId,
+};

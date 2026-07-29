@@ -1,97 +1,55 @@
-const CourseModel = require("../models/CoursesModel");
-const {PutObjectCommand} = require("@aws-sdk/client-s3");
-const s3 = require("../config/s3");
-const CreateCourse = async (req, res) => {
-  try {
-    const AddedCourse = await CourseModel.create(req.body);
-    res.status(201).json({
-      Message: "Course created successfully",
-      data: AddedCourse,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
+const CourseService = require("../services/CourseService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
+
+const CreateCourse = catchAsync(async (req, res) => {
+  const course = await CourseService.createCourse(req.body);
+
+  return ResponseHandler.success(
+    res,
+    "Course created successfully",
+    course,
+    201,
+  );
+});
+
+const UploadCourseThumbnail = catchAsync(async (req, res) => {
+  const imageUrl = await CourseService.uploadCourseThumbnail(req.file);
+
+  return ResponseHandler.success(res, "Thumbnail uploaded successfully", {
+    imageUrl,
+  });
+});
+
+const GetCourses = catchAsync(async (req, res) => {
+  const courses = await CourseService.getCourses();
+
+  return ResponseHandler.success(res, "Courses fetched successfully", courses);
+});
+
+const CourseById = catchAsync(async (req, res) => {
+  const course = await CourseService.getCourseById(req.params.id);
+
+  return ResponseHandler.success(res, "Course fetched successfully", course);
+});
+
+const UpdateCourse = catchAsync(async (req, res) => {
+  const updatedCourse = await CourseService.updateCourse(
+    req.params.id,
+    req.body,
+  );
+
+  return ResponseHandler.success(
+    res,
+    "Course updated successfully",
+    updatedCourse,
+  );
+});
+
+module.exports = {
+  CreateCourse,
+  UploadCourseThumbnail,
+  GetCourses,
+  CourseById,
+  UpdateCourse,
 };
-const UploadCourseThumbnail = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        message: "No file uploaded",
-      });
-    }
-
-    const fileName =
-      `course-thumbnails/${Date.now()}-${req.file.originalname}`;
-
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: fileName,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-      }),
-    );
-
-    const imageUrl =
-      `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-
-    res.status(200).json({
-      message: "Thumbnail uploaded successfully",
-      imageUrl,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
-const GetCourses = async (req,res)=>{
-  try{
-    const Courses = await CourseModel.find()
-    res.status(200).json({
-      message:"Courses Fetched Successfully",
-      data:Courses
-    })
-  }catch(err){
-   res.status(500).json({
-    message:err.message
-   })
-  }
-}
-const CourseById = async (req,res) =>{
-  try{
-  const Course = await CourseModel.findById(req.params.id)
-  res.status(200).json({
-    message:"Course fetched Successfully",
-    data:Course
-  })
-  }catch(err){
-  res.status(500).json({
-    message:err.message
-  })
-  }
-}
-const UpdateCourse = async (req,res) => {
-  try {
-    const updated = await CourseModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updated) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-    res.status(200).json({
-      message: "Course updated successfully",
-      data: updated,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-}
-
-module.exports = { CreateCourse, GetCourses ,CourseById,UpdateCourse, UploadCourseThumbnail}

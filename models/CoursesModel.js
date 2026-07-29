@@ -9,9 +9,10 @@ const CourseSchema = Schema({
     type: String,
     required: [true, "Course description is required"],
   },
-  instructor: {
-    type: String,
-    required: [true, "Instructor name is required"],
+  createdBy:{
+    type:Shcema.Types.ObjectId,
+    ref:"User",
+    required:true,
   },
   category: {
     type: String,

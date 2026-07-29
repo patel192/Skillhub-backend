@@ -18,7 +18,6 @@ const eventRoutes = require("./routes/EventsRoutes");
 const feedbackRoutes = require("./routes/FeedbackRoutes");
 const messagesRoutes = require("./routes/MessagesRoutes");
 const notificationRoutes = require("./routes/NotificationRoutes");
-const searchlogsRoutes = require("./routes/SearchLogsRoutes");
 const skillsRoutes = require("./routes/SkillsRoutes");
 const reportRoutes = require("./routes/ReportRoutes");
 const resourceRoutes = require("./routes/ResourceRoutes");
@@ -28,7 +27,6 @@ const progressRoutes = require("./routes/ProgressRoutes");
 const postRoutes = require("./routes/PostRoutes");
 const communityRoutes = require("./routes/CommunityRoutes");
 const activityRoutes = require("./routes/ActivityRoutes");
-const friendsRoutes = require("./routes/FriendsRoutes");
 const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes");
 const userSettingsRoutes = require("./routes/UserSettingsRoutes")
 const app = express();
@@ -55,7 +53,6 @@ app.use(eventRoutes);
 app.use(feedbackRoutes);
 app.use(messagesRoutes);
 app.use("/notifications", notificationRoutes);
-app.use(searchlogsRoutes);
 app.use(skillsRoutes);
 app.use(reportRoutes);
 app.use(resourceRoutes);
@@ -65,7 +62,6 @@ app.use("/progress", progressRoutes);
 app.use(quizRoutes);
 app.use("/communities", communityRoutes);
 app.use("/activities", activityRoutes);
-app.use("/friends", friendsRoutes);
 app.use(adminOverviewRoutes);
 app.use(userSettingsRoutes)
 

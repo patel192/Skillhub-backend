@@ -1,39 +1,31 @@
-const UserSettings =require("../models/UserSettingsModel");
- const getUserSettings = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    let settings = await UserSettings.findOne({ userId });
-    if (!settings) {
-      settings = new UserSettings.create({ userId });
-    }
-    res.json({
-      success: true,
-      data: settings,
-    });
-  } catch (err) {
-    res.status(500).json({
-        success:false,
-        message:"Failed to get User Settings"
-    })
-  }
-};
+const UserSettingsService = require("../services/UserSettingsService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
 
-const updateUserSettings = async (req,res) => {
-    try{
-  const {userId} = req.params;
-  const settings = await UserSettings.findOneAndUpdate({userId},req.body,{new:true,upsert:true});
-  res.json({
-    success:true,
-    data:settings
-  });
-    }catch(err){
-res.json({
-    success:false,
-    message:"Failed to update the user settings"
-})
-    }
-}
+const getUserSettings = catchAsync(async (req, res) => {
+  const settings = await UserSettingsService.getUserSettings(req.user.id);
+
+  return ResponseHandler.success(
+    res,
+    "User settings fetched successfully",
+    settings,
+  );
+});
+
+const updateUserSettings = catchAsync(async (req, res) => {
+  const settings = await UserSettingsService.updateUserSettings(
+    req.user.id,
+    req.body,
+  );
+
+  return ResponseHandler.success(
+    res,
+    "User settings updated successfully",
+    settings,
+  );
+});
+
 module.exports = {
   getUserSettings,
-  updateUserSettings
-}
+  updateUserSettings,
+};

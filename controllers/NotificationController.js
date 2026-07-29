@@ -1,30 +1,29 @@
-const NotificationModel = require("../models/NotificationModel");
-const AllNotificationForUser = async (req, res) => {
-  try {
-    const notifications = await NotificationModel.find({ userId: req.params.userId })
-      .sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: notifications });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
-const ReadMessage = async (req, res) => {
-  try {
-    const ReadedMessage = await NotificationModel.findByIdAndUpdate(
-      req.params.id,
-      { read: true },
-      { new: true }
-    );
-    res.status(200).json({
-      message: "Message Readed Successfully",
-      data: ReadedMessage,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message || "Internal Server Error",
-    });
-  }
-};
+const NotificationService = require("../services/NotificationService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
+
+const AllNotificationForUser = catchAsync(async (req, res) => {
+  const notifications = await NotificationService.getNotificationsForUser(
+    req.params.userId,
+  );
+
+  return ResponseHandler.success(
+    res,
+    "Notifications fetched successfully",
+    notifications,
+  );
+});
+
+const ReadMessage = catchAsync(async (req, res) => {
+  const notification = await NotificationService.markAsRead(req.params.id);
+
+  return ResponseHandler.success(
+    res,
+    "Notification marked as read",
+    notification,
+  );
+});
+
 module.exports = {
   AllNotificationForUser,
   ReadMessage,

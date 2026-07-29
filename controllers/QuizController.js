@@ -1,48 +1,30 @@
-const QuizModel = require("../models/QuizModel");
-const AddQuestion = async (req, res) => {
-  try {
-    const { courseId, question, options, points } = req.body;
-    if (!courseId || !question || !options || options.length !== 4) {
-      return res.status(400).json({
-        message: "CourseId, question and exactly 4 options are required",
-      });
-    }
+const QuizService = require("../services/QuizService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
 
-    // Ensure at least one correct option
-    const hasCorrect = options.some((opt) => opt.isCorrect === true);
-    if (!hasCorrect) {
-      return res.status(400).json({
-        message: "At least one option must be marked as correct",
-      });
-    }
+const AddQuestion = catchAsync(async (req, res) => {
+  const question = await QuizService.addQuestion(req.body);
 
-    const AddedQuestion = await QuizModel.create({
-      courseId,
-      question,
-      options,
-      points: points || 1, 
-    });
+  return ResponseHandler.success(
+    res,
+    "Question added successfully",
+    question,
+    201,
+  );
+});
 
-    res.status(201).json(AddedQuestion);
-  } catch (err) {
-    res.status(500).json({
-      message: err.message || "Internal Server Error",
-    });
-  }
-};
-const QuestionByCourseId = async (req, res) => {
-  try {
-    const Questions = await QuizModel.find({ courseId: req.params.courseId });
-    res.status(200).json({
-      message: "Questions Found Successfully",
-      data: Questions,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-};
+const QuestionByCourseId = catchAsync(async (req, res) => {
+  const questions = await QuizService.getQuestionsByCourseId(
+    req.params.courseId,
+  );
+
+  return ResponseHandler.success(
+    res,
+    "Questions fetched successfully",
+    questions,
+  );
+});
+
 module.exports = {
   AddQuestion,
   QuestionByCourseId,

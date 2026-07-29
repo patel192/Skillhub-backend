@@ -1,182 +1,66 @@
-const MessagesModel = require("../models/MessagesModel");
-const { emitToUser, getIO } = require("../socket");
+const MessageService = require("../services/MessageService");
+const catchAsync = require("../utils/catchAsync");
+const ResponseHandler = require("../utils/ResponseHandler");
 
-const SendMessage = async (req, res) => {
-  try {
-    const { senderId, receiverId, text, replyTo } = req.body;
+const SendMessage = catchAsync(async (req, res) => {
+  const message = await MessageService.sendMessage(req.body);
 
-    const message = await MessagesModel.create({
-      senderId,
-      receiverId,
-      text,
-      replyTo: replyTo || null,
-      read: false
-    });
+  return ResponseHandler.success(
+    res,
+    "Message sent successfully",
+    message,
+    201,
+  );
+});
 
-    // Populate for response
-    const populatedMessage = await MessagesModel.findById(message._id)
-      .populate("senderId", "fullname name email avatar")
-      .populate("replyTo", "text")
-      .populate("reactions.userId", "fullname");
+const GetConversations = catchAsync(async (req, res) => {
+  const messages = await MessageService.getConversation(
+    req.params.userId,
+    req.params.otherUserId,
+  );
 
-    // Emit to receiver via Socket.IO if they're online
-    const io = getIO();
-    io.to(receiverId.toString()).emit("new_message", {
-      message: populatedMessage
-    });
+  return ResponseHandler.success(
+    res,
+    "Conversation fetched successfully",
+    messages,
+  );
+});
 
-    res.status(201).json({ success: true, message: populatedMessage });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+const AddReaction = catchAsync(async (req, res) => {
+  const message = await MessageService.addReaction(
+    req.params.id,
+    req.body.userId,
+    req.body.emoji,
+  );
 
-const GetConversations = async (req, res) => {
-  try {
-    const { userId, otherUserId } = req.params;
+  return ResponseHandler.success(res, "Reaction updated successfully", message);
+});
 
-    const messages = await MessagesModel.find({
-      $or: [
-        { senderId: userId, receiverId: otherUserId },
-        { senderId: otherUserId, receiverId: userId },
-      ],
-    })
-      .populate("senderId", "name email fullname avatar")
-      .populate("replyTo", "text senderId")
-      .populate("reactions.userId", "fullname")
-      .sort({ createdAt: 1 });
+const ReplyToMessage = catchAsync(async (req, res) => {
+  const reply = await MessageService.replyToMessage(
+    req.params.id,
+    req.body.senderId,
+    req.body.receiverId,
+    req.body.text,
+  );
 
-    // Mark unread messages as read
-    await MessagesModel.updateMany(
-      { senderId: otherUserId, receiverId: userId, read: false },
-      { read: true }
-    );
+  return ResponseHandler.success(res, "Reply sent successfully", reply, 201);
+});
 
-    res.json({ success: true, messages });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+const DeleteMessage = catchAsync(async (req, res) => {
+  await MessageService.deleteMessage(req.params.id);
 
-const AddReaction = async (req, res) => {
-  try {
-    const { userId, emoji } = req.body;
-    const { id } = req.params;
+  return ResponseHandler.success(res, "Message deleted successfully");
+});
 
-    let message = await MessagesModel.findById(id);
-    if (!message)
-      return res
-        .status(404)
-        .json({ success: false, error: "Message not found" });
+const EditMessage = catchAsync(async (req, res) => {
+  const message = await MessageService.editMessage(
+    req.params.id,
+    req.body.text,
+  );
 
-    const existingIndex = message.reactions.findIndex(
-      (r) => r.userId.toString() === userId
-    );
-
-    if (existingIndex >= 0) {
-      if (message.reactions[existingIndex].emoji === emoji) {
-        message.reactions.splice(existingIndex, 1);
-      } else {
-        message.reactions[existingIndex].emoji = emoji;
-      }
-    } else {
-      message.reactions.push({ userId, emoji });
-    }
-
-    await message.save();
-    message = await message.populate("reactions.userId", "fullname");
-
-    // Emit update to conversation participants
-    const io = getIO();
-    const room = [message.senderId.toString(), message.receiverId.toString()];
-    io.to(room).emit("reaction_updated", { message });
-
-    res.json({ success: true, message });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
-
-const ReplyToMessage = async (req, res) => {
-  try {
-    const { senderId, receiverId, text } = req.body;
-    const { id } = req.params;
-
-    const replyMessage = await MessagesModel.create({
-      senderId,
-      receiverId,
-      text,
-      replyTo: id,
-    });
-
-    const populatedMessage = await MessagesModel.findById(replyMessage._id)
-      .populate("senderId", "fullname name email avatar")
-      .populate("replyTo", "text");
-
-    // Emit to receiver
-    const io = getIO();
-    io.to(receiverId.toString()).emit("new_message", {
-      message: populatedMessage
-    });
-
-    res.json({ success: true, replyMessage: populatedMessage });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
-
-const DeleteMessage = async (req, res) => {
-  try {
-    const message = await MessagesModel.findById(req.params.id);
-    if (!message) {
-      return res.status(404).json({ success: false, error: "Message not found" });
-    }
-
-    const { senderId, receiverId } = message;
-    await MessagesModel.findByIdAndDelete(req.params.id);
-
-    // Emit deletion to both users
-    const io = getIO();
-    io.to([senderId.toString(), receiverId.toString()]).emit("message_deleted", {
-      messageId: req.params.id
-    });
-
-    res.json({ success: true, message: "Message deleted" });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
-
-// New: Edit message via HTTP (fallback)
-const EditMessage = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const { id } = req.params;
-
-    let message = await MessagesModel.findById(id);
-    if (!message) {
-      return res.status(404).json({ success: false, error: "Message not found" });
-    }
-
-    message.text = text;
-    message.isEdited = true;
-    await message.save();
-
-    const populatedMessage = await MessagesModel.findById(message._id)
-      .populate("senderId", "fullname name email avatar")
-      .populate("replyTo", "text")
-      .populate("reactions.userId", "fullname");
-
-    // Emit update
-    const io = getIO();
-    io.to([message.senderId.toString(), message.receiverId.toString()])
-      .emit("message_edited", { message: populatedMessage });
-
-    res.json({ success: true, message: populatedMessage });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+  return ResponseHandler.success(res, "Message updated successfully", message);
+});
 
 module.exports = {
   SendMessage,
@@ -184,5 +68,5 @@ module.exports = {
   AddReaction,
   ReplyToMessage,
   DeleteMessage,
-  EditMessage
+  EditMessage,
 };
