@@ -1,16 +1,26 @@
-const UserModel = require("../models/UserModel");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const UserSettings = require("../models/UserSettingsModel");
 const UserService = require("../services/UserService");
 const AuthService = require("../services/AuthService");
-const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 const ResponseHandler = require("../utils/ResponseHandler");
 
+const verifyEmail = catchAsync(async(req,res) => {
+  const result = await AuthService.verifyEmail(req.body);
+  return ResponseHandler.success(res,"Email verified successfully",result,200);
+});
+
+const resendVerificationOTP = catchAsync(async (req,res) => {
+  const result = await AuthService.resendVerificationOTP(req.body);
+  return ResponseHandler.success(res,"A new verification OTP has been sent to your email.",result,200);
+});
+
+const refreshAccessToken = catchAsync(async (req,res) => {
+  const result = await AuthService.refreshAccessToken(req.body.refreshToken);
+  return ResponseHandler.success(res,"Access token refreshed successfully.",result)
+})
+
 const AddUser = catchAsync(async (req, res) => {
   const user = await AuthService.register(req.body);
-  return ResponseHandler.success(res, "User added successfully", user, 200);
+  return ResponseHandler.success(res, "Registration successful,Please verify your email using the OTP sent to your inbox.", user, 201);
 });
 
 const GetAllUsers = catchAsync(async (req, res) => {
@@ -20,7 +30,7 @@ const GetAllUsers = catchAsync(async (req, res) => {
 
 const LoginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const result = await AuthService.login(email, password);
+  const result = await AuthService.login(email, password, req);
   return ResponseHandler.success(res, "Logged In Successfully", result);
 });
 
@@ -57,7 +67,31 @@ const ChangePassword = catchAsync(async (req, res) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req,res) => {
+   const result = await AuthService.forgotPassword(req.body);
+
+   return ResponseHandler.success(res,"Password reset OTP sent successfully.",result);
+});
+
+const verifyResetOTP = catchAsync(async (req,res) => {
+  const result = await AuthService.verifyResetOTP(req.body);
+  return ResponseHandler.success(res,"Password reset OTP verified successfully.",result);
+});
+
+const resetPassword = catchAsync(async (req,res) => {
+  const result = await AuthService.resetPassword(req.body);
+  return ResponseHandler.success(res,"Password has been reset successfully",result);
+})
+
+const logout = catchAsync(async (req,res) => {
+   await AuthService.logout(req.body.refreshToken);
+   return ResponseHandler.success(res,"Logged out successfully.",null);
+})
+
+
 module.exports = {
+  verifyEmail,
+  resendVerificationOTP,
   AddUser,
   GetAllUsers,
   LoginUser,
@@ -66,4 +100,9 @@ module.exports = {
   SearchUser,
   DeleteUser,
   ChangePassword,
+  refreshAccessToken,
+  logout,
+  forgotPassword,
+  resetPassword,
+  verifyResetOTP,
 };

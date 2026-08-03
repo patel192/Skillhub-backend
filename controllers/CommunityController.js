@@ -1,5 +1,6 @@
 const Community = require("../models/CommunityModel");
 const CommunityService = require("../services/CommunityService");
+const catchAsync = require("../utils/catchAsync");
 const ResponseHandler = require("../utils/ResponseHandler");
 const Post = require("../models/PostModel");
 

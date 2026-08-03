@@ -18,7 +18,6 @@ const eventRoutes = require("./routes/EventsRoutes");
 const feedbackRoutes = require("./routes/FeedbackRoutes");
 const messagesRoutes = require("./routes/MessagesRoutes");
 const notificationRoutes = require("./routes/NotificationRoutes");
-const skillsRoutes = require("./routes/SkillsRoutes");
 const reportRoutes = require("./routes/ReportRoutes");
 const resourceRoutes = require("./routes/ResourceRoutes");
 const overviewRoutes = require("./routes/OverviewRoutes");
@@ -29,10 +28,14 @@ const communityRoutes = require("./routes/CommunityRoutes");
 const activityRoutes = require("./routes/ActivityRoutes");
 const adminOverviewRoutes = require("./routes/AdminDashboardOverviewRoutes");
 const userSettingsRoutes = require("./routes/UserSettingsRoutes")
+const {globalLimiter} = require("./middleware/rateLimiter");
+
+
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use(globalLimiter);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
@@ -53,7 +56,6 @@ app.use(eventRoutes);
 app.use(feedbackRoutes);
 app.use(messagesRoutes);
 app.use("/notifications", notificationRoutes);
-app.use(skillsRoutes);
 app.use(reportRoutes);
 app.use(resourceRoutes);
 app.use(overviewRoutes);
@@ -70,5 +72,6 @@ const AppError = require("./utils/AppError");
 app.get("/test-error", (req, res, next) => {
     next(new AppError("This is a test error", 400));
 });
+
 app.use(errorHandler);
 module.exports = app;

@@ -1,5 +1,6 @@
 require("dotenv").config();
 require("./events/listners");
+require("./config/redis");
 
 const mongoose = require("mongoose");
 const http = require("http");

@@ -1,4 +1,4 @@
-const MessageService = require("../services/MessageService");
+const MessageService = require("../services/MessagesService");
 const catchAsync = require("../utils/catchAsync");
 const ResponseHandler = require("../utils/ResponseHandler");
 

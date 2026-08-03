@@ -10,7 +10,7 @@ const CourseSchema = Schema({
     required: [true, "Course description is required"],
   },
   createdBy:{
-    type:Shcema.Types.ObjectId,
+    type:Schema.Types.ObjectId,
     ref:"User",
     required:true,
   },

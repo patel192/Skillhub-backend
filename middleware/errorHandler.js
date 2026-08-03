@@ -4,19 +4,19 @@ const logger = require("../config/logger");
 
 const handleCastError = (err) => ({
   statusCode:400,
-  message: `Invalid ${err.path}: ${err.value}`,
+message: `Invalid value '${err.value}' for '${err.path}'.`,
 });
 
 const handleDuplicateKeyError = (err) => ({
   statusCode:409,
-  message:`${Object.keys(err.keyvalue)[0]} already exists`,
+  message:`${Object.keys(err.keyValue)[0]} already exists`,
 });
 
 const handleValidationError = (err) => ({
   statusCode:400,
   message: Object.values(err.errors)
-  .map((e) => e.message)
-  .join(", "),
+  .map(error => error.message)
+  .join(", ")
 });
 
 const handleZodError = (err) => ({
@@ -48,7 +48,7 @@ const errorHandler = (err, req, res, next) => {
     const duplicate = handleDuplicateKeyError(err);
     statusCode = duplicate.statusCode;
     message = duplicate.message;
-  }else if(err/name === "ValidationError"){
+  }else if(err.name === "ValidationError"){
     const validation = handleValidationError(err);
     statusCode = validation.statusCode;
     message = validation.message;
