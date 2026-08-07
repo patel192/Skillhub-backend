@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const UserModel = require("../models/UserModel");
-const crypto = require("crypto");
 const {
   verifyRefreshToken,
   generateAccessToken,
@@ -123,8 +122,6 @@ const register = async (userData) => {
   await UserSettings.create({
     userId: newUser._id,
   });
-
-  await sendVerificationOTP(newUser.email, newUser.fullname, otp);
 
   return {
     email: newUser.email,
@@ -408,6 +405,5 @@ module.exports = {
   logout,
   forgotPassword,
   verifyResetOTP,
-  changePassword,
   resetPassword,
 };
