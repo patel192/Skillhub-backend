@@ -4,7 +4,7 @@ require("./events/listners");
 const express = require("express");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
-
+const cookieParser = require("cookie-parser")
 const userRoutes = require("./routes/UserRoutes");
 const courseRoutes = require("./routes/CourseRoutes");
 const achievementRoutes = require("./routes/AchievementRoutes");
@@ -34,6 +34,7 @@ const {globalLimiter} = require("./middleware/rateLimiter");
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: "http://localhost:5173",

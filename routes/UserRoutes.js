@@ -2,20 +2,18 @@ const route = require("express").Router();
 const UserController = require("../controllers/UserController");
 const authMiddleware = require("../middleware/authMiddleware");
 const {registerSchema,loginSchema} = require("../validations/auth.validation");
-const logoutSchema = require("../validations/auth/logoutSchema");
 const verifyEmailSchema = require("../validations/auth/verifyEmailSchema");
 const forgotPasswordSchema = require("../validations/auth/forgotPasswordSchema");
 const verifyResetOtpSchema = require("../validations/auth/verifyResetOtpSchema");
 const resetPasswordSchema = require("../validations/auth/resetPasswordSchema");
 const resendVerificationSchema = require("../validations/auth/resendVerificationSchema")
-const refreshTokenSchema = require("../validations/auth/refreshTokenSchema");
 const validate = require("../middleware/validate");
 const rateLimiter = require("../middleware/rateLimiter");
 
 // public routes
 route.post("/verify-email",rateLimiter.verifyOtpLimiter,validate(verifyEmailSchema), UserController.verifyEmail);
 route.post("/verify-email/resend",rateLimiter.resendOtpLimiter,validate(resendVerificationSchema), UserController.resendVerificationOTP);
-route.post("/refresh-token",validate(refreshTokenSchema),UserController.refreshAccessToken);
+route.post("/refresh-token",UserController.refreshAccessToken);
 route.post("/user", rateLimiter.registerLimiter,validate(registerSchema), UserController.AddUser);
 route.post("/loginuser",rateLimiter.loginLimiter,validate(loginSchema),UserController.LoginUser);
 route.post("/forgot-password",rateLimiter.forgotPasswordLimiter,validate(forgotPasswordSchema),UserController.forgotPassword);
@@ -25,10 +23,11 @@ route.post("/reset-password",rateLimiter.resetPasswordLimiter,validate(resetPass
 // protected routes
 route.get("/users",authMiddleware.verifyToken, UserController.GetAllUsers);
 route.get("/user/search",authMiddleware.verifyToken,UserController.SearchUser)
+route.get("/user/me",authMiddleware.verifyToken,UserController.GetCurrentUser);
 route.get("/user/:id",authMiddleware.verifyToken,UserController.GetUserById)
 route.put("/user/:id",authMiddleware.verifyToken,UserController.UpdateUser)
 route.post("/user/:userId/change-password",authMiddleware.verifyToken,UserController.ChangePassword);
 // admin routes
 route.delete("/user/:id",authMiddleware.verifyToken,authMiddleware.isAdmin,UserController.DeleteUser)
-route.post("/logout",validate(logoutSchema),UserController.logout);
+route.post("/logout",UserController.logout);
 module.exports = route;
