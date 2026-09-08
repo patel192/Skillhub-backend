@@ -15,18 +15,18 @@ const verifyCourseOwnership = async (courseId,userId) => {
     return course;
 }
 
-const createSection = async(userId,sectionData) => {
-    const {course,title,description,order} = sectionData;
+const createSection = async(courseId,userId,sectionData) => {
+    const {title,description,order} = sectionData;
 
-    await verifyCourseOwnership(course,userId);
+    await verifyCourseOwnership(courseId,userId);
 
-    const existingSection = await CourseSectionModel.findOne({course,order});
+    const existingSection = await CourseSectionModel.findOne({course: courseId,order});
     if(existingSection){
         throw new AppError("A section with this order already exists in this course",409);
     }
 
     return await CourseSectionModel.create({
-        course,
+        course: courseId,
         title,
         description,
         order,

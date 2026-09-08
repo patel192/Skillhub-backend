@@ -7,6 +7,8 @@ const errorHandler = require("./middleware/errorHandler");
 const cookieParser = require("cookie-parser")
 const userRoutes = require("./routes/UserRoutes");
 const courseRoutes = require("./routes/CourseRoutes");
+const courseSectionRoutes = require("./routes/courseSectionRoutes");
+const lessonRoutes = require("./routes/lessonRoutes");
 const achievementRoutes = require("./routes/AchievementRoutes");
 const analyticsRoutes = require("./routes/AnalyticsRoutes");
 const adminlogRoutes = require("./routes/AdminLogRoutes");
@@ -51,6 +53,8 @@ app.get("/health", (req, res) => {
 // Routes
 app.use(userRoutes);
 app.use(courseRoutes);
+app.use(courseSectionRoutes);
+app.use(lessonRoutes);
 app.use(certificatesRoutes);
 app.use(achievementRoutes);
 app.use(analyticsRoutes);
