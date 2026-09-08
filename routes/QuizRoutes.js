@@ -1,6 +1,12 @@
-const route = require("express").Router()
+const route = require("express").Router();
+
 const QuizController = require("../controllers/QuizController")
 const authMiddleware = require("../middleware/authMiddleware")
-route.post("/question",authMiddleware.verifyToken,authMiddleware.isAdmin,QuizController.AddQuestion)
-route.get("/questions/:courseId",authMiddleware.verifyToken,QuizController.QuestionByCourseId)
+
+const validate = require("../middleware/validate");
+const {addQuestionSchema,quizCourseQuerySchema} = require("../validations/quiz.validation");
+
+
+route.post("/question",authMiddleware.verifyToken,validate(addQuestionSchema),QuizController.AddQuestion)
+route.get("/questions/:courseId",authMiddleware.verifyToken,validate(quizCourseQuerySchema),QuizController.QuestionByCourseId)
 module.exports = route

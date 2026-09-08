@@ -8,7 +8,7 @@ const CreateResource = catchAsync(async (req, res) => {
 });
 
 const GetResources = catchAsync(async (req, res) => {
-  const resources = await ResourceService.getResources();
+  const resources = await ResourceService.getResources(req.validated.query);
   return ResponseHandler.success(res,"Resources fetched successfully",resources);
 });
 

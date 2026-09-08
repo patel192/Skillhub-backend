@@ -1,7 +1,22 @@
 const ResourceModel = require("../models/ResourcesModel");
+const CategoryModel = require("../models/CategoriesModel") 
+
 const AppError = require("../utils/AppError");
 
+const verifyCategoryReference = async (categoryId) => {
+  if (!categoryId) {
+    return;
+  }
+
+  const category = await CategoryModel.findById(categoryId).select("_id");
+  if (!category) {
+    throw new AppError(`Category not found: ${categoryId}`, 404);
+  }
+};
+
 const createResource = async (userId,resourceData) => {
+  await verifyCategoryReference(resourceData.category);
+  
   const resource = await ResourceModel.create({
     ...resourceData,
     createdBy:userId
@@ -9,11 +24,56 @@ const createResource = async (userId,resourceData) => {
   return resource;
 }
 
-const getResources = async() => {
-  return await ResourceModel.find()
-  .populate("createdBy","fullname email")
-  .populate("category","name")
-  .sort({createdAt:-1});
+const getResources = async({page=1,limit=10,search,type,category,sort="newest"} = {}) => {
+  const skip = (page-1) * limit;
+  const filter = {};
+
+  if(search){
+    filter.$or = [
+      {title: {$regex:search,$options:"i"}},
+      {description:{$regex:search,$options:"i"}},
+      {tags:{$regex:search,$options:"i"}}
+    ]
+  }
+
+  if(type){
+    filter.type= type;
+  }
+
+  if(category){
+    filter.category = category;
+  }
+
+  let sortOption = {createdAt: -1};
+
+  if(sort === "oldest"){
+    sortOption = {createdAt:1};
+  }
+
+  const [resources,total] = await Promise.all([
+    ResourceModel.find(filter)
+    .populate("createdBy","fullname email")
+    .populate("category","name")
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit),
+
+    ResourceModel.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(total/limit);
+
+  return {
+    resources,
+    pagination:{
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage:page < totalPages,
+      hasPreviousPage: page > 1 && total > 0,
+    }
+  }
 }
 
 const getResourceById = async (resourceId) => {
@@ -36,6 +96,10 @@ const updateResource = async(resourceId,userId,updateData) => {
 
   if(resource.createdBy.toString() !== userId.toString()){
     throw new AppError("You are not authorized to manage this resource",403);
+  }
+
+  if(updateData.category !== undefined){
+    await verifyCategoryReference(updateData.category);
   }
 
   return await ResourceModel.findByIdAndUpdate(

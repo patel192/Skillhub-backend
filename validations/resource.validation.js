@@ -67,7 +67,23 @@ const updateResourceSchema = z.object({
     }),
 });
 
+const resourceQuerySchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+    search: z.string().trim().max(100).optional(),
+    type: z
+      .enum(["link", "document", "video", "repository"])
+      .optional(),
+    category: objectIdSchema.optional(),
+    sort: z
+      .enum(["newest", "oldest"])
+      .default("newest"),
+  }),
+});
+
 module.exports = {
   createResourceSchema,
   updateResourceSchema,
+  resourceQuerySchema,
 };
