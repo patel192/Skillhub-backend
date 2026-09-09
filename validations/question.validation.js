@@ -24,10 +24,12 @@ const questionOptionSchema = z.object({
 });
 
 const createQuestionSchema = z.object({
+  params: z.object({
+    quizId: objectIdSchema,
+  }),
+
   body: z
     .object({
-      quiz: objectIdSchema,
-
       question: z
         .string({ required_error: "Question is required" })
         .trim()
@@ -102,6 +104,12 @@ const updateQuestionSchema = z.object({
     ),
 });
 
+const questionQuerySchema = z.object({
+  params: z.object({
+    questionId: objectIdSchema,
+  }),
+});
+
 const quizQuestionsQuerySchema = z.object({
   params: z.object({
     quizId: objectIdSchema,
@@ -111,5 +119,6 @@ const quizQuestionsQuerySchema = z.object({
 module.exports = {
   createQuestionSchema,
   updateQuestionSchema,
+  questionQuerySchema,
   quizQuestionsQuerySchema,
 };

@@ -4,7 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const ResponseHandler = require("../utils/ResponseHandler");
 
 const CreateQuestion = catchAsync(async (req, res) => {
-  const question = await QuestionService.createQuestion(req.user.id,req.validated.body);
+  const question = await QuestionService.createQuestion(req.user.id,{...req.validated.body,quiz:req.validated.params.quizId});
   return ResponseHandler.success(res,"Question created successfully",question,201);
 });
 
