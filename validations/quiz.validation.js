@@ -4,55 +4,77 @@ const objectIdSchema = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, "Invalid ID");
 
-const optionSchema = z.object({
-  text: z
-    .string({ required_error: "Option text is required" })
-    .trim()
-    .min(1, "Option text cannot be empty")
-    .max(500),
-  isCorrect: z.boolean({
-    required_error: "isCorrect is required",
+const createQuizSchema = z.object({
+  body: z.object({
+    course: objectIdSchema,
+
+    title: z
+      .string({ required_error: "Quiz title is required" })
+      .trim()
+      .min(3, "Quiz title must be at least 3 characters")
+      .max(200),
+
+    description: z
+      .string()
+      .trim()
+      .max(1000)
+      .optional()
+      .default(""),
+
+    passingScore: z
+      .number()
+      .min(0)
+      .max(100)
+      .default(60),
   }),
-  explanation: z
-    .string()
-    .trim()
-    .max(1000)
-    .optional(),
 });
 
-const addQuestionSchema = z.object({
+const updateQuizSchema = z.object({
+  params: z.object({
+    quizId: objectIdSchema,
+  }),
+
   body: z
     .object({
-      courseId: objectIdSchema,
-      question: z
-        .string({ required_error: "Question is required" })
+      title: z
+        .string()
         .trim()
-        .min(5, "Question must be at least 5 characters")
-        .max(1000),
-      options: z
-        .array(optionSchema)
-        .length(4, "Exactly 4 options are required"),
-      points: z
+        .min(3, "Quiz title must be at least 3 characters")
+        .max(200)
+        .optional(),
+
+      description: z
+        .string()
+        .trim()
+        .max(1000)
+        .optional(),
+
+      passingScore: z
         .number()
-        .positive("Points must be greater than 0")
-        .default(1),
+        .min(0)
+        .max(100)
+        .optional(),
     })
-    .refine(
-      (data) => data.options.some((option) => option.isCorrect === true),
-      {
-        message: "At least one option must be marked as correct",
-        path: ["options"],
-      }
-    ),
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "At least one field is required to update the quiz",
+    }),
 });
 
-const quizCourseQuerySchema = z.object({
+const quizQuerySchema = z.object({
+  params: z.object({
+    quizId: objectIdSchema,
+  }),
+});
+
+const courseQuizQuerySchema = z.object({
   params: z.object({
     courseId: objectIdSchema,
   }),
 });
 
 module.exports = {
-  addQuestionSchema,
-  quizCourseQuerySchema,
+  createQuizSchema,
+  updateQuizSchema,
+  quizQuerySchema,
+  courseQuizQuerySchema,
 };
