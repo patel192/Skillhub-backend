@@ -4,8 +4,9 @@ const QuizAttemptController = require("../controllers/QuizAttemptController");
 const authMiddleware = require("../middleware/authMiddleware");
 const validate = require("../middleware/validate");
 
-const {submitQuizAttemptSchema} = require("../validations/quizAttempt.validation");
+const {submitQuizAttemptSchema,attemptQuerySchema} = require("../validations/quizAttempt.validation");
 
 route.post("/quizzes/:quizId/attempts",authMiddleware.verifyToken,validate(submitQuizAttemptSchema),QuizAttemptController.SubmitQuizAttempt);
+route.get("/quiz-attempts/:attemptId",authMiddleware.verifyToken,validate(attemptQuerySchema),QuizAttemptController.GetAttemptById);
 
 module.exports = route;

@@ -7,6 +7,12 @@ const SubmitQuizAttempt = catchAsync(async (req, res) => {
   return ResponseHandler.success(res,"Quiz submitted successfully",attempt,201);
 });
 
+const GetAttemptById = catchAsync(async (req, res) => {
+  const attempt = await QuizAttemptService.getAttemptById(req.validated.params.attemptId,req.user.id);
+  return ResponseHandler.success(res,"Quiz attempt fetched successfully",attempt);
+});
+
 module.exports = {
   SubmitQuizAttempt,
+  GetAttemptById,
 };

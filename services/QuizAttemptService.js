@@ -23,12 +23,22 @@ const submitQuizAttempt = async (quizId, userId, answers) => {
     throw new AppError("Quiz has no questions", 400);
   }
 
+  if (answers.length !== questions.length) {
+    throw new AppError(
+      `All ${questions.length} questions must be answered`,
+      400,
+    );
+  }
+
   // prevent duplicate answers for the same question
   const questionIds = new Set();
 
   for (const answer of answers) {
     if (questionIds.has(answer.question)) {
-      throw new AppError(`Duplicate answer for question ${answer.question}`,400);
+      throw new AppError(
+        `Duplicate answer for question ${answer.question}`,
+        400,
+      );
     }
 
     questionIds.add(answer.question);
@@ -36,15 +46,15 @@ const submitQuizAttempt = async (quizId, userId, answers) => {
 
   // make sure every submitted question belongs to this quiz
   const questionMap = new Map(
-    questions.map((question) => [
-      question._id.toString(),
-      question,
-    ])
+    questions.map((question) => [question._id.toString(), question]),
   );
 
   for (const answer of answers) {
     if (!questionMap.has(answer.question)) {
-      throw new AppError(`Question ${answer.question} does not belong to this quiz`,400);
+      throw new AppError(
+        `Question ${answer.question} does not belong to this quiz`,
+        400,
+      );
     }
   }
 
@@ -55,12 +65,14 @@ const submitQuizAttempt = async (quizId, userId, answers) => {
     const question = questionMap.get(answer.question);
 
     const selectedOption = question.options.find(
-      (option) =>
-        option._id.toString() === answer.selectedOption
+      (option) => option._id.toString() === answer.selectedOption,
     );
 
     if (!selectedOption) {
-      throw new AppError(`Selected option does not belong to question ${answer.question}`,400);
+      throw new AppError(
+        `Selected option does not belong to question ${answer.question}`,
+        400,
+      );
     }
 
     if (selectedOption.isCorrect) {
@@ -76,13 +88,11 @@ const submitQuizAttempt = async (quizId, userId, answers) => {
   // calculate total possible points
   const totalPoints = questions.reduce(
     (total, question) => total + question.points,
-    0
+    0,
   );
 
   const percentage =
-    totalPoints > 0
-      ? Number(((score / totalPoints) * 100).toFixed(2))
-      : 0;
+    totalPoints > 0 ? Number(((score / totalPoints) * 100).toFixed(2)) : 0;
 
   const passed = percentage >= quiz.passingScore;
 
@@ -98,6 +108,23 @@ const submitQuizAttempt = async (quizId, userId, answers) => {
   });
 };
 
+const getAttemptById = async (attemptId, userId) => {
+  const attempt = await QuizAttemptModel.findById(attemptId)
+    .populate("quiz", "title passingScore")
+    .populate("user", "fullname email");
+
+  if (!attempt) {
+    throw new AppError("Quiz attempt not found", 404);
+  }
+
+  if (attempt.user._id.toString() !== userId.toString()) {
+    throw new AppError("You are not authorized to view this quiz attempt", 403);
+  }
+
+  return attempt;
+};
+
 module.exports = {
   submitQuizAttempt,
+  getAttemptById
 };
