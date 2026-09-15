@@ -124,7 +124,27 @@ const getAttemptById = async (attemptId, userId) => {
   return attempt;
 };
 
+const getMyAttemptsByQuiz = async (quizId, userId) => {
+  const quiz = await QuizModel.findOne({
+    _id: quizId,
+    status: "published",
+  }).select("_id title passingScore");
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", 404);
+  }
+
+  return await QuizAttemptModel.find({
+    quiz: quizId,
+    user: userId,
+  })
+    .select("quiz score percentage passed submittedAt createdAt")
+    .populate("quiz", "title passingScore")
+    .sort({ createdAt: -1 });
+};
+
 module.exports = {
   submitQuizAttempt,
-  getAttemptById
+  getAttemptById,
+  getMyAttemptsByQuiz,
 };
