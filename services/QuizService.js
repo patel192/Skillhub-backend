@@ -1,5 +1,6 @@
 const QuizModel = require("../models/QuizModel");
 const CourseModel = require("../models/CoursesModel");
+const QuestionModel = require("../models/QuestionModel");
 
 const AppError = require("../utils/AppError");
 
@@ -92,7 +93,16 @@ const publishQuiz = async (quizId, userId) => {
     throw new AppError("Quiz is already published", 400);
   }
 
+  const questionCount = await QuestionModel.countDocuments({
+    quiz: quizId,
+  });
+
+  if (questionCount === 0) {
+    throw new AppError("Quiz must have at least one question before it can be published",400);
+  }
+
   quiz.status = "published";
+
   await quiz.save();
   return quiz;
 };
@@ -108,6 +118,7 @@ const deleteQuiz = async (quizId, userId) => {
     throw new AppError("You are not authorized to delete this quiz",403);
   }
 
+  await QuestionModel.deleteMany({quiz: quizId});
   await QuizModel.findByIdAndDelete(quizId);
 };
 
