@@ -37,18 +37,22 @@ const createQuestion = async (userId, questionData) => {
 };
 
 const getQuestionsByQuiz = async (quizId) => {
-  const quiz = await QuizModel.findOne({
-    _id: quizId,
-    status: "published",
-  }).select("_id");
+  const quiz = await QuizModel.findOne({_id: quizId,status: "published"}).select("_id");
+  if (!quiz) throw new AppError("Quiz not found", 404);
 
-  if (!quiz) {
-    throw new AppError("Quiz not found", 404);
-  }
+  const questions = await QuestionModel.find({quiz: quizId}).sort({ order: 1 }).lean();
 
-  return await QuestionModel.find({
-    quiz: quizId,
-  }).sort({ order: 1 });
+  return questions.map((question) => ({
+    _id: question._id,
+    quiz: question.quiz,
+    question: question.question,
+    options: question.options.map((option) => ({
+      _id: option._id,
+      text: option.text,
+    })),
+    points: question.points,
+    order: question.order,
+  }));
 };
 
 const getMyQuestions = async (quizId, userId) => {
