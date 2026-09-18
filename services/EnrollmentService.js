@@ -1,68 +1,161 @@
 const EnrollmentModel = require("../models/EnrollmentModel");
-const ResourceModel = require("../models/ResourcesModel");
-const eventEmitter = require("../events/EventEmitter");
+const CourseModel = require("../models/CoursesModel");
+const LessonModel = require("../models/LessonModel");
 const AppError = require("../utils/AppError");
 
-const addEnrollment = async (enrollmentData) => {
-  const enrollment = await EnrollmentModel.create(enrollmentData);
+const verifyCourseForEnrollment = async (courseId) => {
+  const course = await CourseModel.findById(courseId).select("_id title status");
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
 
-  eventEmitter.emit("ENROLLMENT_CREATED", {
-    userId: enrollment.userId,
-    courseId: enrollment.courseId,
-  });
-
-  return enrollment;
+  if (course.status !== "published") {
+    throw new AppError("You can only enroll in published courses",400);
+  }
+  return course;
 };
 
-const getEnrollmentsByUserId = async (userId) => {
-  const enrollments = await EnrollmentModel.find({
+const enrollInCourse = async (userId, courseId) => {
+  await verifyCourseForEnrollment(courseId);
+
+  const existingEnrollment = await EnrollmentModel.findOne({userId,courseId});
+  if (existingEnrollment) {
+    if (existingEnrollment.status === "active") {
+      throw new AppError("You are already enrolled in this course",409);
+    }
+
+    if (existingEnrollment.status === "completed") {
+      throw new AppError("You have already completed this course",409);
+    }
+
+    if (existingEnrollment.status === "dropped" || existingEnrollment.status === "cancelled") {
+      existingEnrollment.status = "active";
+      existingEnrollment.progress = 0;
+      existingEnrollment.completedLessons = [];
+      existingEnrollment.completedAt = null;
+      existingEnrollment.enrolledAt = new Date();
+
+      return await existingEnrollment.save();
+    }
+  }
+
+  return await EnrollmentModel.create({
     userId,
-  }).populate("courseId");
-
-  return enrollments;
+    courseId,
+    status: "active",
+    progress: 0,
+    completedLessons: [],
+  });
 };
 
-const getEnrollments = async () => {
-  return await EnrollmentModel.find().populate("courseId");
+const getMyEnrollments = async (userId) => {
+  return await EnrollmentModel.find({ userId })
+    .populate({
+      path: "courseId",
+      select:
+        "title description imageUrl price duration level language category",
+      populate: {
+        path: "category",
+        select: "name",
+      },
+    })
+    .sort({ updatedAt: -1 });
 };
 
-const markLessonComplete = async (enrollmentId, lessonId) => {
-  const enrollment = await EnrollmentModel.findById(enrollmentId);
+const getMyEnrollmentById = async (enrollmentId, userId) => {
+  const enrollment = await EnrollmentModel.findOne({_id: enrollmentId,userId}).populate({
+    path: "courseId",
+    select:
+      "title description imageUrl price duration level language category",
+    populate: {
+      path: "category",
+      select: "name",
+    },
+  });
 
   if (!enrollment) {
     throw new AppError("Enrollment not found", 404);
   }
 
-  if (!enrollment.completedLessons.includes(lessonId)) {
-    enrollment.completedLessons.push(lessonId);
+  return enrollment;
+};
 
-    const totalLessons = await ResourceModel.countDocuments({
-      courseId: enrollment.courseId,
-    });
-
-    const completedLessons = enrollment.completedLessons.length;
-
-    enrollment.progress =
-      totalLessons > 0
-        ? Math.round((completedLessons / totalLessons) * 100)
-        : 0;
-
-    if (enrollment.progress === 100) {
-      enrollment.status = "completed";
-    }
-
-    await enrollment.save();
+const completeLesson = async (enrollmentId,lessonId,userId) => {
+  const enrollment = await EnrollmentModel.findOne({
+    _id: enrollmentId,
+    userId,
+  });
+  if (!enrollment) {
+    throw new AppError("Enrollment not found", 404);
   }
 
-  return {
-    progress: enrollment.progress,
-    completedLessons: enrollment.completedLessons,
-  };
+  if (enrollment.status !== "active") {
+    throw new AppError("This enrollment is no longer active",400);
+  }
+
+  const lesson = await LessonModel.findById(lessonId).select("_id section status");
+  if (!lesson) {
+    throw new AppError("Lesson not found", 404);
+  }
+
+  if (lesson.status !== "published") {
+    throw new AppError("You cannot complete an unpublished lesson",400);
+  }
+
+  const alreadyCompleted = enrollment.completedLessons.some((completedLessonId) => completedLessonId.toString() === lessonId.toString());
+  if (!alreadyCompleted) {
+    enrollment.completedLessons.push(lessonId);
+  }
+
+  const CourseSectionModel = require("../models/CourseSectionModel");
+
+  const courseSections = await CourseSectionModel.find({course: enrollment.courseId,}).select("_id");
+
+  const sectionIds = courseSections.map((section) => section._id);
+
+  const totalLessons = await LessonModel.countDocuments({
+    section: { $in: sectionIds },
+    status: "published",
+  });
+
+  if (totalLessons === 0) {
+    enrollment.progress = 0;
+  } else {
+    enrollment.progress = Math.min(100,Math.round((enrollment.completedLessons.length / totalLessons) * 100));
+  }
+
+  if (totalLessons > 0 && enrollment.completedLessons.length >= totalLessons) {
+    enrollment.progress = 100;
+    enrollment.status = "completed";
+    enrollment.completedAt = new Date();
+  }
+
+  await enrollment.save();
+  return enrollment;
+};
+
+const dropCourse = async (enrollmentId, userId) => {
+  const enrollment = await EnrollmentModel.findOne({
+    _id: enrollmentId,
+    userId,
+  });
+  if (!enrollment) {
+    throw new AppError("Enrollment not found", 404);
+  }
+
+  if (enrollment.status !== "active") {
+    throw new AppError("Only active enrollments can be dropped",400);
+  }
+
+  enrollment.status = "dropped";
+  await enrollment.save();
+  return enrollment;
 };
 
 module.exports = {
-  addEnrollment,
-  getEnrollmentsByUserId,
-  getEnrollments,
-  markLessonComplete,
+  enrollInCourse,
+  getMyEnrollments,
+  getMyEnrollmentById,
+  completeLesson,
+  dropCourse,
 };
