@@ -11,7 +11,9 @@ const LessonBlockSchema = new Schema({
             "video",
             "callout",
             "resource",
-            "quiz"
+            "quiz",
+            "tool"
+
         ],
         required: true,
     },

@@ -66,6 +66,18 @@ const quizBlockSchema = z.object({
   }),
 });
 
+const toolBlockSchema = z.object({
+  type: z.literal("tool"),
+  order: z.number().int().min(1),
+  data: z.object({
+    toolId: z
+      .string()
+      .trim()
+      .min(1, "Tool ID is required")
+      .max(100, "Tool ID is too long"),
+  }),
+});
+
 const lessonBlockSchema = z.discriminatedUnion("type", [
   textBlockSchema,
   codeBlockSchema,
@@ -74,6 +86,7 @@ const lessonBlockSchema = z.discriminatedUnion("type", [
   calloutBlockSchema,
   resourceBlockSchema,
   quizBlockSchema,
+  toolBlockSchema,
 ]);
 
 const createLessonSchema = z.object({

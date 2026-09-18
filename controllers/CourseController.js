@@ -4,27 +4,13 @@ const catchAsync = require("../utils/catchAsync");
 const ResponseHandler = require("../utils/ResponseHandler");
 
 const CreateCourse = catchAsync(async (req, res) => {
-  const course = await CourseService.createCourse(
-    req.user.id,
-    req.validated.body,
-  );
-
-  return ResponseHandler.success(
-    res,
-    "Course created successfully",
-    course,
-    201,
-  );
+  const course = await CourseService.createCourse(req.user.id,req.validated.body);
+  return ResponseHandler.success(res,"Course created successfully",course,201);
 });
 
 const GetCourses = catchAsync(async (req, res) => {
   const courses = await CourseService.getCourses(req.validated.query);
-
-  return ResponseHandler.success(
-    res,
-    "Courses fetched successfully",
-    courses,
-  );
+  return ResponseHandler.success(res,"Courses fetched successfully",courses);
 });
 
 const GetMyCourses = catchAsync(async (req, res) => {
